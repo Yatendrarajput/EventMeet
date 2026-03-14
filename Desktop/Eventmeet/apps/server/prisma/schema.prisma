@@ -221,8 +221,8 @@ model User {
   notifications       Notification[]
   bookingsCancelled   Booking[]            @relation("bookingCanceller")
 
-  @@index([id], name: "idx_users_active", map: "idx_users_active")
-  @@index([city], name: "idx_users_city", map: "idx_users_city")
+  @@index([id], map: "idx_users_active")
+  @@index([city], map: "idx_users_city")
   @@map("users")
 }
 
@@ -303,9 +303,9 @@ model Event {
   ratings          Rating[]
   notifications    Notification[]
 
-  @@index([status, startDatetime], name: "idx_events_published", map: "idx_events_published")
-  @@index([category], name: "idx_events_category", map: "idx_events_category")
-  @@index([venueId], name: "idx_events_venue", map: "idx_events_venue")
+  @@index([status, startDatetime], map: "idx_events_published")
+  @@index([category], map: "idx_events_category")
+  @@index([venueId], map: "idx_events_venue")
   @@map("events")
 }
 
@@ -320,10 +320,9 @@ model EventSection {
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
-  event              Event               @relation(fields: [eventId], references: [id])
-  bookings           Booking[]
-  tickets            Ticket[]
-  bookingParticipants BookingParticipant[]
+  event    Event    @relation(fields: [eventId], references: [id])
+  bookings Booking[]
+  tickets  Ticket[]
 
   @@map("event_sections")
 }
@@ -342,8 +341,8 @@ model EventAvailability {
   event Event @relation(fields: [eventId], references: [id])
 
   @@unique([userId, eventId])
-  @@index([eventId, status], name: "idx_availability_event_active", map: "idx_availability_event_active")
-  @@index([userId], name: "idx_availability_user", map: "idx_availability_user")
+  @@index([eventId, status], map: "idx_availability_event_active")
+  @@index([userId], map: "idx_availability_user")
   @@map("event_availability")
 }
 
@@ -368,8 +367,8 @@ model ConnectionRequest {
   event    Event @relation(fields: [eventId], references: [id])
 
   @@unique([senderId, receiverId, eventId])
-  @@index([receiverId, status], name: "idx_connections_receiver", map: "idx_connections_receiver")
-  @@index([eventId], name: "idx_connections_event", map: "idx_connections_event")
+  @@index([receiverId, status], map: "idx_connections_receiver")
+  @@index([eventId], map: "idx_connections_event")
   @@map("connection_requests")
 }
 
@@ -387,11 +386,12 @@ model Conversation {
   updatedAt           DateTime           @updatedAt @map("updated_at") @db.Timestamptz()
   deletedAt           DateTime?          @map("deleted_at") @db.Timestamptz()
 
-  event    Event                @relation(fields: [eventId], references: [id])
-  creator  User?                @relation("conversationCreator", fields: [createdBy], references: [id])
-  members  ConversationMember[]
-  messages Message[]
-  bookings Booking[]
+  event        Event                @relation(fields: [eventId], references: [id])
+  creator      User?                @relation("conversationCreator", fields: [createdBy], references: [id])
+  members      ConversationMember[]
+  messages     Message[]
+  bookings     Booking[]
+  groupInvites GroupInvite[]
 
   @@map("conversations")
 }
@@ -431,7 +431,7 @@ model Message {
   sender       User?        @relation(fields: [senderId], references: [id])
   booking      Booking?     @relation(fields: [bookingId], references: [id])
 
-  @@index([conversationId, createdAt(sort: Desc)], name: "idx_messages_conversation", map: "idx_messages_conversation")
+  @@index([conversationId, createdAt(sort: Desc)], map: "idx_messages_conversation")
   @@map("messages")
 }
 
@@ -567,8 +567,8 @@ model Booking {
   refunds            Refund[]
   messages           Message[]
 
-  @@index([eventId, status], name: "idx_bookings_event_status", map: "idx_bookings_event_status")
-  @@index([initiatedBy], name: "idx_bookings_initiated_by", map: "idx_bookings_initiated_by")
+  @@index([eventId, status], map: "idx_bookings_event_status")
+  @@index([initiatedBy], map: "idx_bookings_initiated_by")
   @@map("bookings")
 }
 
@@ -590,8 +590,6 @@ model BookingParticipant {
 
   booking           Booking            @relation(fields: [bookingId], references: [id])
   user              User               @relation(fields: [userId], references: [id])
-  section           EventSection?      @relation(fields: [sectionId], references: [id])
-  sectionId         String?            @map("section_id_ref") @db.Uuid
   creditTransaction CreditTransaction? @relation(fields: [creditTransactionId], references: [id])
 
   @@unique([bookingId, userId])
@@ -640,7 +638,7 @@ model Ticket {
   section EventSection @relation(fields: [sectionId], references: [id])
 
   @@unique([bookingId, userId])
-  @@index([userId, status], name: "idx_tickets_user", map: "idx_tickets_user")
+  @@index([userId, status], map: "idx_tickets_user")
   @@map("tickets")
 }
 
@@ -648,7 +646,7 @@ model Refund {
   id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId            String       @map("user_id") @db.Uuid
   bookingId         String?      @map("booking_id") @db.Uuid
-  creditTransactionId String?    @map("credit_transaction_id") @db.Uuid
+  creditTransactionId String?    @unique @map("credit_transaction_id") @db.Uuid
   amount            Decimal      @db.Decimal(12, 2)
   reason            RefundReason
   status            RefundStatus @default(PENDING)
@@ -686,7 +684,7 @@ model Rating {
   event     Event @relation(fields: [eventId], references: [id])
 
   @@unique([raterId, bookingId])
-  @@index([ratedUserId], name: "idx_ratings_rated_user", map: "idx_ratings_rated_user")
+  @@index([ratedUserId], map: "idx_ratings_rated_user")
   @@map("ratings")
 }
 
@@ -709,7 +707,7 @@ model Notification {
   event Event? @relation(fields: [eventId], references: [id])
   eventId String? @map("event_id") @db.Uuid
 
-  @@index([userId, isRead], name: "idx_notifications_user_unread", map: "idx_notifications_user_unread")
-  @@index([userId, createdAt(sort: Desc)], name: "idx_notifications_user_created", map: "idx_notifications_user_created")
+  @@index([userId, isRead], map: "idx_notifications_user_unread")
+  @@index([userId, createdAt(sort: Desc)], map: "idx_notifications_user_created")
   @@map("notifications")
 }
