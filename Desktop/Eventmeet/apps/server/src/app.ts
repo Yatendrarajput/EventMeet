@@ -7,8 +7,8 @@ import { config } from '@/config'
 import { logger } from '@/shared/utils/logger'
 import { errorHandler } from '@/shared/middleware/errorHandler'
 
+import { authRouter } from '@/modules/auth/auth.routes'
 // Route imports — added as each module is built
-// import { authRouter } from '@/modules/auth/auth.router'
 // import { usersRouter } from '@/modules/users/users.router'
 // import { eventsRouter } from '@/modules/events/events.router'
 // import { availabilityRouter } from '@/modules/availability/availability.router'
@@ -74,8 +74,8 @@ export function createApp() {
   // ── API v1 routes
   const v1 = express.Router()
 
+  v1.use('/auth', authRouter)
   // Uncomment as modules are built:
-  // v1.use('/auth', authRouter)
   // v1.use('/users', usersRouter)
   // v1.use('/events', eventsRouter)
   // v1.use('/admin', adminRouter)
