@@ -8,8 +8,9 @@ import { logger } from '@/shared/utils/logger'
 import { errorHandler } from '@/shared/middleware/errorHandler'
 
 import { authRouter } from '@/modules/auth/auth.routes'
+import { usersRouter } from '@/modules/users/users.routes'
+import { eventsRouter } from '@/modules/events/events.routes'
 // Route imports — added as each module is built
-// import { usersRouter } from '@/modules/users/users.router'
 // import { eventsRouter } from '@/modules/events/events.router'
 // import { availabilityRouter } from '@/modules/availability/availability.router'
 // import { connectionsRouter } from '@/modules/connections/connections.router'
@@ -75,9 +76,9 @@ export function createApp() {
   const v1 = express.Router()
 
   v1.use('/auth', authRouter)
+  v1.use('/users', usersRouter)
+  v1.use('/events', eventsRouter)
   // Uncomment as modules are built:
-  // v1.use('/users', usersRouter)
-  // v1.use('/events', eventsRouter)
   // v1.use('/admin', adminRouter)
 
   app.use('/v1', v1)
