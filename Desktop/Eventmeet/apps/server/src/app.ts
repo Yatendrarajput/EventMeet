@@ -12,8 +12,8 @@ import { usersRouter }       from '@/modules/users/users.routes'
 import { eventsRouter }      from '@/modules/events/events.routes'
 import { connectionsRouter }    from '@/modules/connections/connections.routes'
 import { conversationsRouter }  from '@/modules/conversations/conversations.routes'
+import { bookingsRouter }       from '@/modules/bookings/bookings.routes'
 // Route imports — added as each module is built
-// import { availabilityRouter } from '@/modules/availability/availability.router'
 // import { conversationsRouter } from '@/modules/conversations/conversations.router'
 // import { messagesRouter } from '@/modules/messages/messages.router'
 // import { creditsRouter } from '@/modules/credits/credits.router'
@@ -80,6 +80,7 @@ export function createApp() {
   v1.use('/events',      eventsRouter)
   v1.use('/connections',    connectionsRouter)
   v1.use('/conversations',  conversationsRouter)
+  v1.use('/bookings',       bookingsRouter)
   // Uncomment as modules are built:
   // v1.use('/admin', adminRouter)
 
