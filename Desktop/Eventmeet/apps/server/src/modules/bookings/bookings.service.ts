@@ -89,7 +89,7 @@ export async function createBooking(initiatorId: string, input: CreateBookingInp
           paymentDeadline:          softExpiry,
           participants: {
             create: [
-              { userId: initiatorId, status: 'CONFIRMED', amountDue: perPersonAmount },
+              { userId: initiatorId, status: 'ACCEPTED', amountDue: perPersonAmount },
               ...participants.map(userId => ({
                 userId,
                 status:    'INVITED' as const,
