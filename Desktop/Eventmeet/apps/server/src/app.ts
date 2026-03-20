@@ -13,7 +13,8 @@ import { eventsRouter }      from '@/modules/events/events.routes'
 import { connectionsRouter }    from '@/modules/connections/connections.routes'
 import { conversationsRouter }  from '@/modules/conversations/conversations.routes'
 import { bookingsRouter }       from '@/modules/bookings/bookings.routes'
-import { paymentsRouter }      from '@/modules/payments/payments.routes'
+import { paymentsRouter }       from '@/modules/payments/payments.routes'
+import { notificationsRouter }  from '@/modules/notifications/notifications.routes'
 // Route imports — added as each module is built
 // import { conversationsRouter } from '@/modules/conversations/conversations.router'
 // import { messagesRouter } from '@/modules/messages/messages.router'
@@ -83,6 +84,7 @@ export function createApp() {
   v1.use('/conversations',  conversationsRouter)
   v1.use('/bookings',       bookingsRouter)
   v1.use('/payments',       paymentsRouter)
+  v1.use('/notifications',  notificationsRouter)
   // Uncomment as modules are built:
   // v1.use('/admin', adminRouter)
 

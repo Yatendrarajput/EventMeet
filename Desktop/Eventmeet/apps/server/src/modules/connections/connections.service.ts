@@ -1,6 +1,7 @@
 import { ConnectionStatus } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { AppError } from '@/shared/middleware/errorHandler'
+import { createNotification } from '@/modules/notifications/notifications.service'
 import type { SendConnectionRequestInput } from './connections.types'
 
 // ─────────────────────────────────────────────────────────────────
@@ -65,6 +66,15 @@ export async function sendRequest(
     },
   })
 
+  // Notify receiver
+  createNotification({
+    userId:  receiverId,
+    type:    'CONNECTION_REQUEST',
+    title:   'New connection request',
+    body:    `Someone wants to connect with you at this event`,
+    data:    { connectionId: request.id, senderId },
+  }).catch(() => {})
+
   return { request, autoAccepted: false }
 }
 
@@ -97,6 +107,17 @@ export async function respondToRequest(
       receiver: { select: { id: true, fullName: true, avatarUrl: true } },
     },
   })
+
+  // Notify original sender when accepted
+  if (action === 'ACCEPT') {
+    createNotification({
+      userId:  updated.sender.id,
+      type:    'CONNECTION_ACCEPTED',
+      title:   'Connection request accepted',
+      body:    `${updated.receiver.fullName} accepted your connection request`,
+      data:    { connectionId: updated.id },
+    }).catch(() => {})
+  }
 
   return updated
 }
@@ -148,7 +169,7 @@ export async function listConnections(userId: string, page: number, limit: numbe
     respondedAt:  c.respondedAt,
     createdAt:    c.createdAt,
     event:        c.event,
-    connectedUser: c.senderId === userId ? c.receiver : c.sender,
+    connectedUser: c.sender.id === userId ? c.receiver : c.sender,
   }))
 
   return { connections: normalized, page, limit, total }
