@@ -17,6 +17,7 @@ import { paymentsRouter }       from '@/modules/payments/payments.routes'
 import { notificationsRouter }  from '@/modules/notifications/notifications.routes'
 import { ratingsRouter }        from '@/modules/ratings/ratings.routes'
 import { creditsRouter }        from '@/modules/credits/credits.routes'
+import { adminRouter }          from '@/modules/admin/admin.routes'
 // Route imports — added as each module is built
 // import { conversationsRouter } from '@/modules/conversations/conversations.router'
 // import { messagesRouter } from '@/modules/messages/messages.router'
@@ -89,6 +90,7 @@ export function createApp() {
   v1.use('/notifications',  notificationsRouter)
   v1.use('/ratings',        ratingsRouter)
   v1.use('/credits',        creditsRouter)
+  v1.use('/admin',          adminRouter)
   // Uncomment as modules are built:
   // v1.use('/admin', adminRouter)
 
