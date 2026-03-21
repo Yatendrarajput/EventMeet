@@ -7,12 +7,18 @@ import { config } from '@/config'
 import { logger } from '@/shared/utils/logger'
 import { errorHandler } from '@/shared/middleware/errorHandler'
 
+import { authRouter }        from '@/modules/auth/auth.routes'
+import { usersRouter }       from '@/modules/users/users.routes'
+import { eventsRouter }      from '@/modules/events/events.routes'
+import { connectionsRouter }    from '@/modules/connections/connections.routes'
+import { conversationsRouter }  from '@/modules/conversations/conversations.routes'
+import { bookingsRouter }       from '@/modules/bookings/bookings.routes'
+import { paymentsRouter }       from '@/modules/payments/payments.routes'
+import { notificationsRouter }  from '@/modules/notifications/notifications.routes'
+import { ratingsRouter }        from '@/modules/ratings/ratings.routes'
+import { creditsRouter }        from '@/modules/credits/credits.routes'
+import { adminRouter }          from '@/modules/admin/admin.routes'
 // Route imports — added as each module is built
-// import { authRouter } from '@/modules/auth/auth.router'
-// import { usersRouter } from '@/modules/users/users.router'
-// import { eventsRouter } from '@/modules/events/events.router'
-// import { availabilityRouter } from '@/modules/availability/availability.router'
-// import { connectionsRouter } from '@/modules/connections/connections.router'
 // import { conversationsRouter } from '@/modules/conversations/conversations.router'
 // import { messagesRouter } from '@/modules/messages/messages.router'
 // import { creditsRouter } from '@/modules/credits/credits.router'
@@ -74,10 +80,18 @@ export function createApp() {
   // ── API v1 routes
   const v1 = express.Router()
 
+  v1.use('/auth',        authRouter)
+  v1.use('/users',       usersRouter)
+  v1.use('/events',      eventsRouter)
+  v1.use('/connections',    connectionsRouter)
+  v1.use('/conversations',  conversationsRouter)
+  v1.use('/bookings',       bookingsRouter)
+  v1.use('/payments',       paymentsRouter)
+  v1.use('/notifications',  notificationsRouter)
+  v1.use('/ratings',        ratingsRouter)
+  v1.use('/credits',        creditsRouter)
+  v1.use('/admin',          adminRouter)
   // Uncomment as modules are built:
-  // v1.use('/auth', authRouter)
-  // v1.use('/users', usersRouter)
-  // v1.use('/events', eventsRouter)
   // v1.use('/admin', adminRouter)
 
   app.use('/v1', v1)
