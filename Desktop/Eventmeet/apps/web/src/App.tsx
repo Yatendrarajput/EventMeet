@@ -1,21 +1,34 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { AppLayout }      from '@/components/layout/AppLayout'
+import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
+import Landing    from '@/pages/Landing'
+import Login      from '@/pages/auth/Login'
+import Register   from '@/pages/auth/Register'
+import ComingSoon from '@/pages/ComingSoon'
 
-// Pages will be added as each module is built
 function App() {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <div className="flex min-h-screen items-center justify-center">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-brand-600">EventMeet</h1>
-              <p className="mt-2 text-gray-500">Meet real people at real events.</p>
-              <p className="mt-6 text-sm text-gray-400">Frontend coming soon — server is up.</p>
-            </div>
-          </div>
-        }
-      />
+      {/* Public */}
+      <Route path="/"         element={<Landing />} />
+      <Route path="/login"    element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* Protected — app shell */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/events"        element={<ComingSoon title="Events" />} />
+          <Route path="/events/:id"    element={<ComingSoon title="Event Detail" />} />
+          <Route path="/connections"   element={<ComingSoon title="Connections" />} />
+          <Route path="/conversations" element={<ComingSoon title="Messages" />} />
+          <Route path="/bookings"      element={<ComingSoon title="My Bookings" />} />
+          <Route path="/notifications" element={<ComingSoon title="Notifications" />} />
+          <Route path="/profile"       element={<ComingSoon title="Profile" />} />
+          <Route path="/admin"         element={<ComingSoon title="Admin Dashboard" />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
