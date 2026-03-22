@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
 import Landing    from '@/pages/Landing'
 import Login      from '@/pages/auth/Login'
 import Register   from '@/pages/auth/Register'
+import Events     from '@/pages/Events'
 import ComingSoon from '@/pages/ComingSoon'
 
 function App() {
@@ -17,7 +18,7 @@ function App() {
       {/* Protected — app shell */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/events"        element={<ComingSoon title="Events" />} />
+          <Route path="/events"        element={<Events />} />
           <Route path="/events/:id"    element={<ComingSoon title="Event Detail" />} />
           <Route path="/connections"   element={<ComingSoon title="Connections" />} />
           <Route path="/conversations" element={<ComingSoon title="Messages" />} />
