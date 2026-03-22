@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { MapPin, Clock, Users, IndianRupee } from 'lucide-react'
+import { MapPin, Clock, Users, Banknote } from 'lucide-react'
 import { cn, formatDate, formatTime, formatCurrency } from '@/lib/utils'
 import type { Event, EventCategory } from '@/types/event'
 
@@ -84,7 +84,7 @@ export function EventCard({ event, index = 0 }: Props) {
 
           <div className="flex items-center justify-between pt-1 border-t border-border">
             <div className="flex items-center gap-1 text-violet-light font-semibold text-sm">
-              <IndianRupee className="w-3.5 h-3.5" />
+              <Banknote className="w-3.5 h-3.5" />
               {event.sections.length > 0
                 ? <span>{formatCurrency(minPrice).replace('₹', '')}+</span>
                 : <span>Free</span>

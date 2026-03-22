@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Search, SlidersHorizontal, X, Loader2 } from 'lucide-react'
+import { Search, X, Loader2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { EventCard } from '@/components/ui/EventCard'
 import { cn } from '@/lib/utils'
-import type { EventCategory, EventsResponse } from '@/types/event'
+import type { Event, EventCategory, EventsResponse } from '@/types/event'
 
 const CATEGORIES: { value: EventCategory | ''; label: string; emoji: string }[] = [
   { value: '',        label: 'All',     emoji: '🌟' },
@@ -30,14 +30,14 @@ export default function Events() {
       if (category) params.category = category
       if (city)     params.city     = city
       const res = await api.get('/events', { params })
-      return res.data.data
+      return { data: res.data.data, pagination: res.data.pagination }
     },
     staleTime: 1000 * 60 * 2,
   })
 
-  const filtered = data?.events.filter(e =>
+  const filtered = (data?.data ?? []).filter((e: Event) =>
     search ? e.title.toLowerCase().includes(search.toLowerCase()) : true
-  ) ?? []
+  )
 
   const clearFilters = () => {
     setSearch(''); setCategory(''); setCity(''); setPage(1)
@@ -104,7 +104,7 @@ export default function Events() {
       {/* Results count */}
       {!isLoading && data && (
         <p className="text-text-disabled text-xs">
-          {hasFilters ? `${filtered.length} results` : `${data.total} events`}
+          {hasFilters ? `${filtered.length} results` : `${data.pagination.total} events`}
         </p>
       )}
 
@@ -126,14 +126,14 @@ export default function Events() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((event, i) => (
+          {filtered.map((event: Event, i: number) => (
             <EventCard key={event.id} event={event} index={i} />
           ))}
         </div>
       )}
 
       {/* Pagination */}
-      {data && data.total > 12 && (
+      {data && data.pagination.total > 12 && (
         <div className="flex items-center justify-center gap-3 pt-4">
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -143,11 +143,11 @@ export default function Events() {
             Previous
           </button>
           <span className="text-sm text-text-secondary">
-            Page {page} of {Math.ceil(data.total / 12)}
+            Page {page} of {Math.ceil(data.pagination.total / 12)}
           </span>
           <button
             onClick={() => setPage(p => p + 1)}
-            disabled={page >= Math.ceil(data.total / 12)}
+            disabled={!data.pagination.hasMore}
             className="btn-secondary btn-sm"
           >
             Next

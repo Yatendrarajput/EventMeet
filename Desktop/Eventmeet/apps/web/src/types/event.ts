@@ -31,8 +31,6 @@ export interface Event {
 }
 
 export interface EventsResponse {
-  events: Event[]
-  total:  number
-  page:   number
-  limit:  number
+  data:       Event[]
+  pagination: { page: number; limit: number; total: number; hasMore: boolean }
 }
