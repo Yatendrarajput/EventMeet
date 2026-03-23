@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'sonner'
 
 export const api = axios.create({
   baseURL: '/v1',
@@ -27,7 +28,8 @@ api.interceptors.response.use(
         return api(original)
       } catch {
         sessionStorage.removeItem('access_token')
-        window.location.href = '/login'
+        toast.error('Session expired. Please sign in again.')
+        setTimeout(() => { window.location.href = '/login' }, 1500)
       }
     }
     return Promise.reject(error)

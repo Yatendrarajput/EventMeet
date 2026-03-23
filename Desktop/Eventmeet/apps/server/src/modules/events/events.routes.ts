@@ -32,6 +32,12 @@ eventsRouter.get('/:id',
   controller.getEventByIdController
 )
 
+eventsRouter.get('/:id/my-availability',
+  authenticate,
+  validate({ params: schema.eventIdParams }),
+  controller.getMyAvailabilityController
+)
+
 eventsRouter.get('/:id/available-users',
   authenticate,
   validate({ params: schema.eventIdParams }),

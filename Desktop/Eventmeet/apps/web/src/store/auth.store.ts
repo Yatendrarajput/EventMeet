@@ -16,6 +16,7 @@ interface AuthState {
   isAuth:       boolean
   setAuth:      (user: User, token: string) => void
   setToken:     (token: string) => void
+  updateUser:   (patch: Partial<User>) => void
   logout:       () => void
 }
 
@@ -34,6 +35,10 @@ export const useAuthStore = create<AuthState>()(
       setToken: (token) => {
         sessionStorage.setItem('access_token', token)
         set({ accessToken: token })
+      },
+
+      updateUser: (patch) => {
+        set(s => ({ user: s.user ? { ...s.user, ...patch } : s.user }))
       },
 
       logout: () => {

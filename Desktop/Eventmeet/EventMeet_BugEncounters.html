@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EventMeet — Bug Encounters & Fixes</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0f;
+      color: #f1f0ff;
+      line-height: 1.7;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+
+    /* Header */
+    .page-header {
+      text-align: center;
+      padding: 48px 0 40px;
+      border-bottom: 1px solid #2a2a3a;
+      margin-bottom: 48px;
+    }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #7c3aed, #e94560);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .page-header h1 { font-size: 36px; font-weight: 800; margin-bottom: 12px; }
+    .page-header p { color: #8b8a9b; font-size: 15px; max-width: 600px; margin: 0 auto; }
+    .gradient-text {
+      background: linear-gradient(135deg, #9f67ff, #e94560);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 48px;
+    }
+    .stat-pill {
+      background: #13131a;
+      border: 1px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 12px 20px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .stat-pill .number { font-size: 28px; font-weight: 800; color: #9f67ff; }
+    .stat-pill .label  { font-size: 11px; color: #8b8a9b; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+    /* Section header */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #4a4a5a;
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #2a2a3a;
+    }
+
+    /* Bug card */
+    .bug-card {
+      background: #13131a;
+      border: 1px solid #2a2a3a;
+      border-radius: 16px;
+      margin-bottom: 28px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .bug-card:hover { border-color: #3a3a4a; }
+
+    .bug-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px 24px;
+      border-bottom: 1px solid #2a2a3a;
+      background: #1c1c27;
+    }
+    .bug-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .bug-header-text { flex: 1; }
+    .bug-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .bug-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+    .tag-phase    { background: #7c3aed22; color: #9f67ff; border: 1px solid #7c3aed44; }
+    .tag-layer    { background: #e9456022; color: #e94560; border: 1px solid #e9456044; }
+    .tag-severity-high   { background: #ef444422; color: #f87171; border: 1px solid #ef444444; }
+    .tag-severity-medium { background: #f59e0b22; color: #fbbf24; border: 1px solid #f59e0b44; }
+    .tag-severity-low    { background: #10b98122; color: #34d399; border: 1px solid #10b98144; }
+
+    .bug-body { padding: 20px 24px; }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      margin-top: 18px;
+    }
+    .section-title:first-child { margin-top: 0; }
+    .section-title.symptom  { color: #f87171; }
+    .section-title.cause    { color: #fbbf24; }
+    .section-title.fix      { color: #34d399; }
+    .section-title.lesson   { color: #9f67ff; }
+
+    p { color: #c4c3d4; font-size: 14px; margin-bottom: 8px; }
+    p:last-child { margin-bottom: 0; }
+
+    pre, code {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    }
+    .code-block {
+      background: #0a0a0f;
+      border: 1px solid #2a2a3a;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+    .code-block pre { color: #c4c3d4; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+    .code-block .comment { color: #4a4a5a; }
+    .code-block .keyword { color: #9f67ff; }
+    .code-block .string  { color: #34d399; }
+    .code-block .error   { color: #f87171; }
+    .code-block .fix-line { color: #34d399; }
+
+    .inline-code {
+      background: #1c1c27;
+      border: 1px solid #2a2a3a;
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-size: 12px;
+      color: #9f67ff;
+      font-family: 'Cascadia Code', monospace;
+    }
+
+    .diff-block {
+      background: #0a0a0f;
+      border: 1px solid #2a2a3a;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 10px 0;
+      font-size: 13px;
+      font-family: 'Cascadia Code', monospace;
+    }
+    .diff-removed { background: #ef444415; color: #f87171; padding: 3px 14px; display: block; }
+    .diff-added   { background: #10b98115; color: #34d399;  padding: 3px 14px; display: block; }
+    .diff-neutral { color: #4a4a5a; padding: 3px 14px; display: block; }
+
+    .lesson-box {
+      background: #7c3aed11;
+      border: 1px solid #7c3aed33;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 10px;
+    }
+    .lesson-box p { color: #c4c3d4; }
+
+    ul { list-style: none; padding: 0; }
+    ul li {
+      color: #c4c3d4;
+      font-size: 14px;
+      padding: 3px 0 3px 18px;
+      position: relative;
+    }
+    ul li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: #4a4a5a;
+    }
+
+    /* Phase section dividers */
+    .phase-divider {
+      text-align: center;
+      margin: 40px 0 28px;
+      position: relative;
+    }
+    .phase-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #2a2a3a;
+    }
+    .phase-divider span {
+      position: relative;
+      background: #0a0a0f;
+      padding: 0 16px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #4a4a5a;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px 0 20px;
+      border-top: 1px solid #2a2a3a;
+      margin-top: 48px;
+      color: #4a4a5a;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="badge">Debug Log</div>
+    <h1>EventMeet <span class="gradient-text">Bug Encounters</span></h1>
+    <p>A complete record of every bug found, diagnosed, and fixed during the EventMeet build — from Docker setup through the full-stack frontend. Each entry includes the symptom, root cause, fix, and lesson learned.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-pill"><div class="number">23</div><div class="label">Bugs Fixed</div></div>
+    <div class="stat-pill"><div class="number">6</div><div class="label">Categories</div></div>
+    <div class="stat-pill"><div class="number">5</div><div class="label">Recurring Patterns</div></div>
+    <div class="stat-pill"><div class="number">0</div><div class="label">Open Issues</div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="phase-divider"><span>Infrastructure &amp; Setup</span></div>
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- BUG 1 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#1</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Docker Desktop WSL Distro Timeout</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 1 — Setup</span>
+          <span class="tag tag-layer">Infrastructure</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>Docker Desktop hung indefinitely on startup. Attempting to run <span class="inline-code">docker-compose up</span> produced the error:</p>
+      <div class="code-block"><pre><span class="error">error listing WSL distros: running wslexec: An error occurred in the WSL subsystem</span></pre></div>
+      <p>Docker Desktop showed a spinning loader forever. No containers could start.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>WSL 2 (Windows Subsystem for Linux) — which Docker Desktop uses as its backend on Windows — had entered a corrupted/hung state. This commonly happens after Windows updates, sleep/hibernate cycles, or abrupt machine shutdowns. The WSL kernel was still registered as running but was unresponsive.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <div class="code-block"><pre><span class="comment"># Step 1: Forcibly terminate all WSL instances</span>
+wsl --shutdown
+
+<span class="comment"># Step 2: Update WSL kernel to latest</span>
+wsl --update
+
+<span class="comment"># Step 3: Restart Docker Desktop as Administrator</span>
+<span class="comment"># (Right-click → Run as Administrator)</span></pre></div>
+      <p>After running these three steps in sequence, Docker Desktop started successfully within ~30 seconds.</p>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>On Windows with WSL 2, Docker Desktop hangs are almost always a WSL state issue, not a Docker issue. <span class="inline-code">wsl --shutdown</span> is the first command to run — it's safe and instantly resets all WSL instances. Always run Docker Desktop as Administrator on Windows.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 2 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#2</div>
+      <div class="bug-header-text">
+        <div class="bug-title">PrismaClientInitializationError — Cannot Reach Database</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 1 — Setup</span>
+          <span class="tag tag-layer">Infrastructure</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>Server started but crashed immediately on the first DB query:</p>
+      <div class="code-block"><pre><span class="error">PrismaClientInitializationError: Can't reach database server at `localhost:5432`
+Please make sure your database server is running at `localhost:5432`.</span></pre></div>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>Docker Desktop was not running, so the PostgreSQL container defined in <span class="inline-code">docker-compose.yml</span> was not up. Prisma tried to connect to <span class="inline-code">localhost:5432</span> but nothing was listening there.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <ul>
+        <li>Start Docker Desktop and wait for it to fully initialize (green icon in taskbar)</li>
+        <li>Run <span class="inline-code">docker-compose up -d</span> to bring up PostgreSQL and Redis containers</li>
+        <li>Verify with <span class="inline-code">docker ps</span> — both containers should show <strong>Up</strong> status</li>
+        <li>Then start the server with <span class="inline-code">npm run dev</span></li>
+      </ul>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Always have a startup order: Docker → Containers → Server → Frontend. The server has a hard dependency on running containers. A useful check is to add a <span class="inline-code">healthcheck</span> in docker-compose.yml so the server waits for Postgres to be ready before connecting.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="phase-divider"><span>Backend — Database &amp; Schema</span></div>
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- BUG 3 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#f59e0b22;color:#fbbf24;">#3</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Prisma Schema Circular Relation Validation Error</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 2 — Schema</span>
+          <span class="tag tag-layer">Database</span>
+          <span class="tag tag-severity-medium">Medium</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>Running <span class="inline-code">prisma db push</span> failed with a schema validation error:</p>
+      <div class="code-block"><pre><span class="error">Error: Ambiguous relation detected. The fields `sender` and `receiver`
+in model `ConnectionRequest` both point to `User`.
+Please provide a `name` argument in the @relation attribute.</span></pre></div>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>The <span class="inline-code">ConnectionRequest</span> model had two relations pointing to the same <span class="inline-code">User</span> model — <span class="inline-code">sender</span> and <span class="inline-code">receiver</span>. Prisma cannot resolve which relation is which without explicit names because both back-references on <span class="inline-code">User</span> would be ambiguous.</p>
+      <div class="code-block"><pre><span class="comment">// Before — ambiguous, Prisma rejects this</span>
+model ConnectionRequest {
+  sender   User @relation(fields: [senderId], references: [id])
+  receiver User @relation(fields: [receiverId], references: [id])
+}</pre></div>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>Added named relations using the <span class="inline-code">name</span> argument in both the foreign model and the back-reference on <span class="inline-code">User</span>:</p>
+      <div class="code-block"><pre><span class="comment">// After — named relations, Prisma is satisfied</span>
+model ConnectionRequest {
+  sender   User @relation(<span class="fix-line">"connectionSender"</span>,   fields: [senderId],   references: [id])
+  receiver User @relation(<span class="fix-line">"connectionReceiver"</span>, fields: [receiverId], references: [id])
+}
+
+model User {
+  sentRequests     ConnectionRequest[] @relation(<span class="fix-line">"connectionSender"</span>)
+  receivedRequests ConnectionRequest[] @relation(<span class="fix-line">"connectionReceiver"</span>)
+}</pre></div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Any time two fields in the same model reference the same target model, Prisma requires named relations. This pattern appears in self-referencing models (e.g. User follows User) and any model with multiple FK relationships to the same target.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 4 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#f59e0b22;color:#fbbf24;">#4</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Windows EPERM Rename Error After prisma db push</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 2 — Schema</span>
+          <span class="tag tag-layer">Database</span>
+          <span class="tag tag-severity-low">Low</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>After a successful <span class="inline-code">prisma db push</span>, the terminal printed:</p>
+      <div class="code-block"><pre><span class="error">Error: EPERM: operation not permitted, rename
+'...query_engine-windows.dll.node.tmp' → '...query_engine-windows.dll.node'</span></pre></div>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>The Prisma CLI tries to update its native query engine binary (<span class="inline-code">.dll.node</span>) after a schema push. On Windows, this file was still loaded (locked) by the running server process, so the OS refused the rename operation. This is a Windows-only file locking issue.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>No fix needed — this is a <strong>harmless warning</strong>. The schema was already pushed successfully. The existing DLL in memory is valid for the current session. The error only means the newer binary copy failed to replace the locked file. Restarting the server after the push loads the updated binary cleanly.</p>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>On Windows, always stop the dev server before running <span class="inline-code">prisma db push</span> or <span class="inline-code">prisma generate</span> to avoid file locking conflicts. On Mac/Linux this is not an issue.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="phase-divider"><span>Backend — Business Logic</span></div>
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- BUG 5 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#5</div>
+      <div class="bug-header-text">
+        <div class="bug-title">ParticipantStatus Enum Mismatch in Bookings</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 7 — Bookings</span>
+          <span class="tag tag-layer">Backend Logic</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>Creating a booking via <span class="inline-code">POST /bookings</span> threw a Prisma validation error at runtime:</p>
+      <div class="code-block"><pre><span class="error">PrismaClientValidationError: Invalid value for argument `status`:
+Value 'CONFIRMED' does not exist in enum 'ParticipantStatus'.</span></pre></div>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>In the bookings service, when creating the booking initiator's participant record, the code used the status value <span class="inline-code">'CONFIRMED'</span>. However, the Prisma schema defined the <span class="inline-code">ParticipantStatus</span> enum without a <span class="inline-code">CONFIRMED</span> value. The valid values were: <span class="inline-code">INVITED</span>, <span class="inline-code">ACCEPTED</span>, <span class="inline-code">DECLINED</span>, <span class="inline-code">LEFT</span>, <span class="inline-code">PAID</span>, <span class="inline-code">REFUNDED</span>.</p>
+      <div class="code-block"><pre><span class="comment">// Incorrect — 'CONFIRMED' does not exist in the enum</span>
+<span class="error">status: 'CONFIRMED'</span>  <span class="comment">// ← bug here</span></pre></div>
+
+      <div class="section-title fix">Fix Applied</div>
+      <div class="diff-block">
+        <span class="diff-removed">-  status: 'CONFIRMED',  // initiator</span>
+        <span class="diff-added">+  status: 'ACCEPTED',   // initiator confirms themselves</span>
+        <span class="diff-neutral">   status: 'INVITED',    // other participants</span>
+      </div>
+      <p>The booking initiator is set to <span class="inline-code">ACCEPTED</span> (they've confirmed their own spot) while other invited participants are set to <span class="inline-code">INVITED</span>.</p>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Enum values must match exactly what is declared in the Prisma schema. TypeScript catches these at compile time if you import the enum from <span class="inline-code">@prisma/client</span> rather than using raw string literals. Always use <span class="inline-code">import { ParticipantStatus } from '@prisma/client'</span> and reference <span class="inline-code">ParticipantStatus.ACCEPTED</span> instead of <span class="inline-code">'ACCEPTED'</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 6 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#f59e0b22;color:#fbbf24;">#6</div>
+      <div class="bug-header-text">
+        <div class="bug-title">UUID with Quotes Causing Prisma Parse Error</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 7 — Bookings</span>
+          <span class="tag tag-layer">Backend Logic</span>
+          <span class="tag tag-severity-medium">Medium</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>A Postman request to <span class="inline-code">POST /bookings</span> failed with:</p>
+      <div class="code-block"><pre><span class="error">invalid character: expected an optional prefix of `urn:uuid` followed by `[0-9a-fA-F-]{36}`</span></pre></div>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>The UUID was copied from a previous API response and pasted into the Postman request body with surrounding double-quotes included as part of the value. So instead of a clean UUID string, the value was <span class="inline-code">"\"9f32b511-825a-4341-a3e7-...\""</span> — Prisma's UUID parser rejected the leading quote character.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>Copied the raw UUID value without the surrounding quotation marks. Human error, not a code bug.</p>
+      <div class="diff-block">
+        <span class="diff-removed">-  "sectionId": "\"9f32b511-825a-4341-a3e7-abc123\""</span>
+        <span class="diff-added">+  "sectionId": "9f32b511-825a-4341-a3e7-abc123"</span>
+      </div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>When copying UUIDs from JSON responses in Postman, copy only the value inside the outer quotes, not the quotes themselves. This is a common mistake when manually assembling API test requests.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="phase-divider"><span>Frontend — Data Fetching (Recurring Pattern)</span></div>
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- BUG 7 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#7</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Events Page Blank — sendPaginated Response Shape Mismatch (First Instance)</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / API Contract</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>The Events page rendered completely blank. Browser console showed:</p>
+      <div class="code-block"><pre><span class="error">TypeError: Cannot read properties of undefined (reading 'filter')</span></pre></div>
+      <p>The page loaded but no event cards appeared, and filtering/searching had no effect.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>The backend <span class="inline-code">sendPaginated</span> utility wraps array data as:</p>
+      <div class="code-block"><pre>{
+  "success": true,
+  "data": [ ...events ],          <span class="comment">// &lt;-- array directly here</span>
+  "pagination": { "page": 1, "limit": 10, "total": 25, "hasMore": true }
+}</pre></div>
+      <p>But the frontend query function expected the old shape <span class="inline-code">res.data.data.events</span> — i.e., it looked for a nested <span class="inline-code">events</span> key inside <span class="inline-code">data</span>. That path was <span class="inline-code">undefined</span>, causing <span class="inline-code">.filter()</span> to throw.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <div class="diff-block">
+        <span class="diff-removed">-  return { data: res.data.data.events, pagination: res.data.pagination }</span>
+        <span class="diff-added">+  return { data: res.data.data, pagination: res.data.pagination }</span>
+      </div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>This was the first of <strong>four</strong> identical bugs caused by the same incorrect assumption about the response shape. The fix pattern is always: <span class="inline-code">res.data.data</span> is the payload array, <span class="inline-code">res.data.pagination</span> is the pagination object. Establish this contract in a shared API type or document it to prevent recurrence.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 8 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#8</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Connections Page Empty Despite DB Having Accepted Records</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / API Contract</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>The Connections page showed "No connections yet" even though the database had 2 <span class="inline-code">ACCEPTED</span> connection records for the logged-in user. Confirmed via direct DB inspection (Prisma Studio).</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>Identical to Bug #7. The connections controller also uses <span class="inline-code">sendPaginated</span>, but the frontend query assumed the response shape was <span class="inline-code">{ connections: [...] }</span> nested inside <span class="inline-code">res.data.data</span>:</p>
+      <div class="code-block"><pre><span class="error">return res.data.data as { connections: Connection[]; total: number }</span>
+<span class="comment">// res.data.data is actually Connection[] directly</span>
+<span class="comment">// so .connections is undefined → [] → empty UI</span></pre></div>
+
+      <div class="section-title fix">Fix Applied</div>
+      <div class="diff-block">
+        <span class="diff-removed">-  return res.data.data as { connections: Connection[]; total: number }</span>
+        <span class="diff-added">+  return {</span>
+        <span class="diff-added">+    connections: res.data.data as Connection[],</span>
+        <span class="diff-added">+    total: res.data.pagination.total as number,</span>
+        <span class="diff-added">+  }</span>
+      </div>
+      <p>Same fix applied to the pending requests and sent requests queries in the same page.</p>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Second instance of the same <span class="inline-code">sendPaginated</span> shape bug. At this point the pattern was identified: every paginated endpoint in the frontend needs to read <span class="inline-code">res.data.data</span> (array) and <span class="inline-code">res.data.pagination</span> (object), never treat <span class="inline-code">res.data.data</span> as an object with a named array inside it.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 9 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#9</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Conversations List Empty — Same sendPaginated Pattern</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / API Contract</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>Messages page showed "0 conversations" and an empty left panel, even after creating DM conversations via the Connections page message button.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>Third instance of the same shape bug. The conversations list query treated <span class="inline-code">res.data.data</span> as <span class="inline-code">{ conversations: [...] }</span>.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <div class="diff-block">
+        <span class="diff-removed">-  return res.data.data as { conversations: Conversation[]; total: number }</span>
+        <span class="diff-added">+  return {</span>
+        <span class="diff-added">+    conversations: res.data.data as Conversation[],</span>
+        <span class="diff-added">+    total: res.data.pagination.total as number,</span>
+        <span class="diff-added">+  }</span>
+      </div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Third instance — by this point a clear rule was established: wrap every <span class="inline-code">sendPaginated</span> response in the same normalized shape on the frontend. A shared utility or custom hook <span class="inline-code">usePaginatedQuery</span> would prevent this entirely.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 10 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#10</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Chat Messages Not Showing — sendPaginated Pattern (Fourth Instance)</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / API Contract</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>Messages were successfully sent (the conversation's last message preview updated in the sidebar showing text like "Yupp, Lets go"), but the chat thread area showed "No messages yet. Say hello!" — the messages never appeared in the bubbles.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>The messages query for the thread used the same wrong assumption:</p>
+      <div class="code-block"><pre><span class="error">return res.data.data as { messages: Message[]; total: number }
+// res.data.data is Message[] directly
+// msgData.messages === undefined → messages = [] → empty thread</span></pre></div>
+
+      <div class="section-title fix">Fix Applied</div>
+      <div class="diff-block">
+        <span class="diff-removed">-  return res.data.data as { messages: Message[]; total: number }</span>
+        <span class="diff-added">+  return {</span>
+        <span class="diff-added">+    messages: res.data.data as Message[],</span>
+        <span class="diff-added">+    total: res.data.pagination.total as number,</span>
+        <span class="diff-added">+  }</span>
+      </div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Fourth and final instance of this pattern. The subtle clue was: the last message preview in the sidebar DID update (that uses a different field written directly by the server), but the thread was empty (that reads from the paginated GET endpoint). This confirmed it was a response parsing issue, not a data storage issue.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="phase-divider"><span>Frontend — Null Safety &amp; Runtime Crashes</span></div>
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- BUG 11 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#11</div>
+      <div class="bug-header-text">
+        <div class="bug-title">EventDetail Page Crash — Cannot Read charAt of Null</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / Null Safety</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>The EventDetail page crashed with a white screen on events where some users had marked availability. Browser console showed:</p>
+      <div class="code-block"><pre><span class="error">TypeError: Cannot read properties of null (reading 'charAt')</span></pre></div>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>The "People going" panel renders avatars using the first character of <span class="inline-code">user.fullName</span> as a fallback. However, <span class="inline-code">fullName</span> is a nullable field in the database — some users registered without providing a name. The code called <span class="inline-code">.charAt(0)</span> directly on a <span class="inline-code">null</span> value.</p>
+      <div class="code-block"><pre><span class="comment">// Before — crashes when fullName is null</span>
+<span class="error">user.fullName.charAt(0).toUpperCase()</span></pre></div>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>Applied optional chaining and a nullish coalescing fallback across all avatar initial renders:</p>
+      <div class="diff-block">
+        <span class="diff-removed">-  user.fullName.charAt(0).toUpperCase()</span>
+        <span class="diff-added">+  user.fullName?.charAt(0)?.toUpperCase() ?? '?'</span>
+      </div>
+      <p>The same fix was applied to the organizer card and sidebar user display.</p>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Any user-provided string field (fullName, bio, username) should be treated as potentially null/undefined in the UI, regardless of backend validation, because: (a) old records may pre-date validation rules, (b) OAuth providers may not supply all fields. Always use <span class="inline-code">?.</span> and <span class="inline-code">??</span> for display values derived from user data.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="phase-divider"><span>Frontend — Security &amp; State Management</span></div>
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- BUG 12 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#12</div>
+      <div class="bug-header-text">
+        <div class="bug-title">React Query Cache Poisoning on User Switch (Security Bug)</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Security / State</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>When User A logged out and User B logged in on the same browser session, navigating to <span class="inline-code">/profile</span> showed <strong>User A's personal profile data</strong> until a manual page refresh. This is a data privacy/security breach.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>The React Query <span class="inline-code">QueryClient</span> is a singleton created once in <span class="inline-code">main.tsx</span> and lives for the entire browser session. Its in-memory cache persists across logins. When User A logs out, the cache still holds <span class="inline-code">['profile-me']</span>, <span class="inline-code">['connections']</span>, <span class="inline-code">['conversations']</span>, etc. When User B logs in and visits the profile page, React Query serves the stale cached data — User A's data — before the network request for User B completes (or even fires, since <span class="inline-code">staleTime</span> was set to 5 minutes).</p>
+      <div class="code-block"><pre><span class="comment">// main.tsx — QueryClient lives for the entire app lifetime</span>
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 1000 * 60 * 5 } }
+})
+
+<span class="comment">// Logout — only cleared Zustand store, NOT the query cache</span>
+<span class="error">logout() // ← User A's data still in queryClient cache!</span>
+navigate('/login')</pre></div>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>Called <span class="inline-code">queryClient.clear()</span> <strong>before</strong> clearing the auth store and navigating away. This nukes the entire in-memory cache instantly.</p>
+      <div class="diff-block">
+        <span class="diff-added">+  const queryClient = useQueryClient()</span>
+        <span class="diff-neutral">   const handleLogout = () => {</span>
+        <span class="diff-added">+    queryClient.clear()   // wipe all cached data first</span>
+        <span class="diff-neutral">     logout()</span>
+        <span class="diff-neutral">     navigate('/login')</span>
+        <span class="diff-neutral">   }</span>
+      </div>
+      <p><strong>Why <span class="inline-code">clear()</span> over <span class="inline-code">invalidateQueries()</span>?</strong> — <span class="inline-code">invalidateQueries</span> marks data as stale but leaves it in the cache, so the stale value is still shown as a background value until the refetch resolves. <span class="inline-code">clear()</span> removes everything immediately — zero window where wrong user's data is visible.</p>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>In any SPA with a shared query cache, <strong>logout must clear all cached data</strong>. This is a commonly missed security step. React Query's <span class="inline-code">queryClient.clear()</span> on logout is the correct pattern. The same applies to any global state (Zustand, Redux) that holds user-specific data — reset all stores on logout, not just the auth token.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="phase-divider"><span>Frontend — Navigation &amp; Feature Gaps</span></div>
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- BUG 13 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#f59e0b22;color:#fbbf24;">#13</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Message Button on Connections Navigated Without Creating a Conversation</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / UX Flow</span>
+          <span class="tag tag-severity-medium">Medium</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>Clicking the chat icon on a connection card navigated to <span class="inline-code">/conversations</span>, but no conversation was open or pre-selected. The thread panel showed "Select a conversation." There was no way to actually start chatting with a connected user from the Connections page.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>The message button only called <span class="inline-code">navigate('/conversations')</span> — it navigated to the page but did nothing to create or identify the conversation for that specific user pair. The conversations page had no context about which user to open a chat with.</p>
+      <div class="code-block"><pre><span class="comment">// Before — just navigates, no DM creation</span>
+<span class="error">onClick={() => navigate('/conversations')}</span></pre></div>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>The message button now:</p>
+      <ul>
+        <li>POSTs to <span class="inline-code">POST /conversations</span> with <span class="inline-code">{ type: 'DIRECT', eventId, memberIds: [otherId] }</span></li>
+        <li>The backend is idempotent — returns existing DM if one already exists, or creates a new one</li>
+        <li>Invalidates the <span class="inline-code">['conversations']</span> cache so the list is fresh</li>
+        <li>Navigates to <span class="inline-code">/conversations</span> with the conversation ID in React Router state</li>
+        <li>The Conversations page reads <span class="inline-code">location.state.conversationId</span> to pre-select the thread</li>
+      </ul>
+      <div class="code-block"><pre><span class="fix-line">async function handleMessage(conn) {</span>
+  const res = await api.post('/conversations', {
+    type: 'DIRECT', eventId: conn.event.id, memberIds: [conn.connectedUser.id]
+  })
+  queryClient.invalidateQueries({ queryKey: ['conversations'] })
+  navigate('/conversations', { state: { conversationId: res.data.data.id } })
+}</pre></div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Navigation between features needs to carry context. "Go to messages" is not enough — it must answer "which message?" When navigating with intent (open a specific item), use React Router <span class="inline-code">state</span> to pass the ID. The receiving page reads it on mount to initialize the correct view.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 14 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#f59e0b22;color:#fbbf24;">#14</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Race Condition — Navigated Before Conversations Cache Refreshed</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / Async Timing</span>
+          <span class="tag tag-severity-medium">Medium</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>After fixing Bug #13, clicking the message button correctly called POST and navigated with the conversation ID in state. But on the conversations page, the thread still didn't open — the thread panel showed "Select a conversation" because <span class="inline-code">conversations.find(c => c.id === selectedId)</span> returned <span class="inline-code">undefined</span>.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>A timing/ordering issue. The conversations list query used <span class="inline-code">staleTime: 0</span> but the cache wasn't invalidated before navigating. The navigation happened while the query was still in-flight — so on mount, <span class="inline-code">conversations</span> was an empty array and <span class="inline-code">selected</span> was <span class="inline-code">null</span>. Even though the query eventually resolved, the initial render had no conversation to select.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>Called <span class="inline-code">queryClient.invalidateQueries({ queryKey: ['conversations'] })</span> <em>before</em> navigating. This ensures the conversations page re-fetches immediately on mount and includes the newly created conversation in the list, so <span class="inline-code">selected</span> resolves on the first meaningful render.</p>
+      <div class="diff-block">
+        <span class="diff-added">+  queryClient.invalidateQueries({ queryKey: ['conversations'] })</span>
+        <span class="diff-neutral">   navigate('/conversations', { state: { conversationId } })</span>
+      </div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>When navigating to a page that depends on freshly mutated data, invalidate the relevant queries <em>before</em> navigating, not after. This pre-emptively marks the data as stale so the destination page fetches fresh data on mount rather than serving cached (outdated) data that may not include the new record.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 15 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#10b98122;color:#34d399;">#15</div>
+      <div class="bug-header-text">
+        <div class="bug-title">React Router v7 Future Flag Deprecation Warnings</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / Dependencies</span>
+          <span class="tag tag-severity-low">Low</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>Browser console printed two yellow warnings on every page load:</p>
+      <div class="code-block"><pre><span class="error">⚠️ React Router Future Flag Warning: React Router will begin wrapping state
+updates in React.startTransition in v7. You can use the v7_startTransition
+future flag to opt-in early.
+
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat
+routes is changing in v7. You can use v7_relativeSplatPath to opt-in early.</span></pre></div>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>These are not errors — they are deprecation warnings from React Router v6 informing developers of upcoming breaking changes in v7. The app uses React Router v6 without opting into the new v7 behaviors via future flags. The warnings appear because React Router v6 ships with opt-in previews of v7's new routing behaviors.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p><strong>No fix required.</strong> These are informational warnings, not bugs. The application functions correctly. They can be silenced by adding future flags to <span class="inline-code">BrowserRouter</span>:</p>
+      <div class="code-block"><pre><span class="comment">// Optional — silences warnings, previews v7 behavior</span>
+&lt;BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}&gt;</pre></div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Distinguish between console errors (broken functionality) and warnings (deprecation notices). React Router future flag warnings are safe to ignore until upgrading to v7. Don't spend debugging time on warnings that don't affect application behavior.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="phase-divider"><span>Phase 13 — Frontend Integration Bugs</span></div>
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- BUG 16 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#f59e0b22;color:#fbbf24;">#16</div>
+      <div class="bug-header-text">
+        <div class="bug-title">"I'm Going" Toggle State Resets After Save</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / React State</span>
+          <span class="tag tag-severity-med">Medium</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>On the EventDetail page, after toggling "I'm Going" and saving a note, the toggle appeared to reset — the button showed the wrong state on re-render despite the backend correctly saving the value.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>The <span class="inline-code">isGoing</span> local state was derived from the initial query result but was not being synchronized after the availability mutation succeeded. The mutation invalidated the query, but the new query result wasn't driving the UI — the old local state was.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>Changed the component to derive <span class="inline-code">isGoing</span> directly from the query result (<span class="inline-code">myAvailability?.isGoing ?? false</span>) rather than a separate <span class="inline-code">useState</span>. After mutation, the query refetch naturally updates the UI:</p>
+      <div class="code-block"><pre><span class="comment">// BEFORE — local state that can drift from server</span>
+<span class="error">const [isGoing, setIsGoing] = useState(false)</span>
+
+<span class="comment">// AFTER — always reflects server state</span>
+<span class="fix-line">const isGoing = myAvailability?.isGoing ?? false</span></pre></div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Never duplicate server state in local React state. If data comes from a <span class="inline-code">useQuery</span>, derive UI state from the query result — don't copy it into <span class="inline-code">useState</span>. The single source of truth is the query cache.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 17 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#f59e0b22;color:#fbbf24;">#17</div>
+      <div class="bug-header-text">
+        <div class="bug-title">People Going Panel — Null fullName Crash</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / TypeScript</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>The "People Going" sidebar on EventDetail crashed with <span class="inline-code">Cannot read properties of null (reading 'charAt')</span> for users who hadn't completed their profile. TypeScript also started producing cascading errors: <span class="inline-code">.length</span> and <span class="inline-code">.slice</span> not found on type.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>Two issues stacked:</p>
+      <ol style="padding-left:20px; color:#c9c8d8;">
+        <li>The <span class="inline-code">AvailableUser</span> TypeScript interface declared <span class="inline-code">fullName: string</span> but the database field is nullable — some users register without ever filling in their name.</li>
+        <li>The type mismatch caused <span class="inline-code">useQuery&lt;AvailableUser[]&gt;</span> to fail its overload resolution, making <span class="inline-code">availableUsers</span> an unresolved type — which then broke downstream <span class="inline-code">.length</span> and <span class="inline-code">.slice</span> calls as TypeScript couldn't infer the array type.</li>
+      </ol>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>Two changes: (1) Fix the interface to match reality. (2) Use optional chaining for all display code:</p>
+      <div class="code-block"><pre><span class="comment">// Interface fix</span>
+interface AvailableUser {
+  fullName: <span class="fix-line">string | null</span>  <span class="comment">// was: string</span>
+  ...
+}
+
+<span class="comment">// Display fix</span>
+{user.fullName?.charAt(0)?.toUpperCase() ?? '?'}</pre></div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>User-provided fields (fullName, bio, username, avatarUrl, city) should always be typed as <span class="inline-code">string | null</span> in frontend interfaces — they match Prisma's nullable columns. A single wrong type can break TypeScript inference for an entire component via overload cascade.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 18 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#18</div>
+      <div class="bug-header-text">
+        <div class="bug-title">ReferenceError: useState is not defined — Connections Page Crash</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / React Imports</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>After adding URL-driven tab state to the Connections page, the entire page crashed with <span class="inline-code">ReferenceError: useState is not defined</span> at the <span class="inline-code">ConnectionsTab</span> sub-component on line ~200.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>When replacing the tab <span class="inline-code">useState</span> with <span class="inline-code">useSearchParams</span>, the import line was updated to import only <span class="inline-code">useSearchParams</span> — removing <span class="inline-code">useState</span>. But <span class="inline-code">ConnectionsTab</span>, a sub-component defined in the same file, still used <span class="inline-code">useState</span> for its own local state. The error only appeared at the sub-component level, not at the top of the page.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>Restored <span class="inline-code">useState</span> alongside <span class="inline-code">useSearchParams</span> in the import:</p>
+      <div class="code-block"><pre><span class="comment">// BEFORE (broken)</span>
+<span class="error">import { useSearchParams } from 'react-router-dom'</span>
+
+<span class="comment">// AFTER (correct)</span>
+<span class="fix-line">import { useState } from 'react'</span>
+import { useSearchParams } from 'react-router-dom'</pre></div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>When refactoring imports, scan the entire file for usages — not just the top-level component. Sub-components defined in the same file share the import scope.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 19 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#19</div>
+      <div class="bug-header-text">
+        <div class="bug-title">isAdmin Never Returned from Login — Admin Link Never Visible</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Backend / Auth / Prisma Select</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>The Admin link in the sidebar never appeared — even after setting <span class="inline-code">is_admin = true</span> in the database via Prisma Studio and signing in again. The admin dashboard was unreachable from the UI.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>Three separate omissions stacked:</p>
+      <ol style="padding-left:20px; color:#c9c8d8;">
+        <li>The Prisma <span class="inline-code">select</span> in <span class="inline-code">auth.service.ts login()</span> did not include <span class="inline-code">isAdmin: true</span> — so the field was never fetched from the DB.</li>
+        <li>The <span class="inline-code">AuthUser</span> interface in <span class="inline-code">auth.types.ts</span> did not declare <span class="inline-code">isAdmin: boolean</span>.</li>
+        <li>The Zustand auth store therefore always had <span class="inline-code">user.isAdmin === undefined</span>, which is falsy — the sidebar condition <span class="inline-code">{user?.isAdmin && &lt;AdminLink /&gt;}</span> never rendered.</li>
+      </ol>
+
+      <div class="section-title fix">Fix Applied</div>
+      <div class="code-block"><pre><span class="comment">// auth.service.ts — add isAdmin to select</span>
+select: {
+  id: true, email: true, fullName: true,
+  passwordHash: true, isVerified: true,
+  <span class="fix-line">isAdmin: true,</span>
+  emailVerifiedAt: true, isActive: true, deletedAt: true,
+}
+
+<span class="comment">// auth.types.ts — add to interface</span>
+interface AuthUser {
+  ...
+  <span class="fix-line">isAdmin: boolean</span>
+}</pre></div>
+      <p>Also required: sign out and sign back in, since the Zustand store holds login-time data and does not auto-refresh from the DB.</p>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>When a field appears in the DB but not in the UI, check the chain: DB column → Prisma select → response DTO → frontend type → component condition. A missing link at any step silently returns <span class="inline-code">undefined</span>. Restarting the session is required after fixing backend auth fields — the store holds a snapshot from login time.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 20 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#20</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Admin Users Tab Blank — isBanned vs isActive Mismatch</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / API Contract</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>The Admin Users tab loaded but showed a blank table. No console errors. Data was being fetched (Network tab showed 200 with valid user array) but the table rows were not rendering.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>The <span class="inline-code">AdminUser</span> TypeScript interface was written with <span class="inline-code">isBanned: boolean</span>, but the backend returns <span class="inline-code">isActive: boolean</span> (active = true means NOT banned). The ban button condition <span class="inline-code">u.isBanned</span> was always <span class="inline-code">undefined</span>, causing a crash in the conditional class logic that silently swallowed row rendering.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <div class="code-block"><pre><span class="comment">// Interface fix</span>
+interface AdminUser {
+  ...
+  <span class="error">isBanned: boolean  // WRONG — field doesn't exist</span>
+  <span class="fix-line">isActive: boolean  // CORRECT — true = active, false = banned</span>
+}
+
+<span class="comment">// Logic fix — isActive is the inverse of "banned"</span>
+ban: <span class="fix-line">u.isActive</span>  <span class="comment">// ban the user when they are currently active</span>
+{!u.isActive ? 'Banned' : 'Active'}  <span class="comment">// display logic</span></pre></div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Always verify field names against the actual API response, not intuition. "isBanned" feels natural but the backend uses the positive form "isActive". Field naming conventions (positive vs negative booleans) must be consistent and documented.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 21 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#ef444422;color:#f87171;">#21</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Admin Bookings Tab Blank — initiator vs user Relation Name</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / API Contract</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>Admin Bookings tab showed blank rows. Network request returned data but <span class="inline-code">b.user.fullName</span> was undefined — rendering crashed silently.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>In the Prisma schema, the booking → user relation is named <span class="inline-code">initiator</span> (reflecting that a booking is always initiated by one user). The admin bookings endpoint returns <span class="inline-code">{ initiator: { fullName, email }, event: { title }, ... }</span>. The frontend was accessing <span class="inline-code">b.user.email</span> — a field that does not exist on the response object.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <div class="code-block"><pre><span class="comment">// Frontend type fix</span>
+bookings: Array&lt;{
+  id: string; status: string; finalAmount: string; createdAt: string
+  <span class="error">user: { fullName: string | null; email: string }  // WRONG</span>
+  <span class="fix-line">initiator: { fullName: string | null; email: string }  // CORRECT</span>
+  event: { title: string }
+}&gt;
+
+<span class="comment">// JSX fix</span>
+<span class="error">{b.user.fullName ?? '—'}</span>
+<span class="fix-line">{b.initiator.fullName ?? '—'}</span></pre></div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Relation names in Prisma can differ from what seems obvious. "user" feels natural but the schema used "initiator" to express the semantic of the relationship. Always refer to the Prisma schema or a prior API response sample when writing frontend types for relational data.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 22 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#10b98122;color:#34d399;">#22</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Admin + Connections URL Same for All Tabs (useState Not URL-Driven)</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / Routing</span>
+          <span class="tag tag-severity-low">Low</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>On both the Connections page and the Admin Dashboard, switching between tabs did not update the URL. All three tabs had the same URL (<span class="inline-code">/connections</span> or <span class="inline-code">/admin</span>). Refreshing the page always reset to the first tab. Notifications couldn't deep-link to the Requests tab via <span class="inline-code">/connections?tab=requests</span>.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>Tab state was stored in <span class="inline-code">useState</span> — local React state that lives only in memory. It does not survive page refresh and cannot be set via URL. Notification click tried to navigate to <span class="inline-code">/connections?tab=requests</span> but the page just mounted with <span class="inline-code">useState</span>'s default value, ignoring the query param.</p>
+
+      <div class="section-title fix">Fix Applied</div>
+      <p>Replaced <span class="inline-code">useState</span> with <span class="inline-code">useSearchParams</span> from React Router v6 for tab state on both pages:</p>
+      <div class="code-block"><pre><span class="comment">// BEFORE — ephemeral, URL-blind</span>
+<span class="error">const [tab, setTab] = useState&lt;Tab&gt;('connections')</span>
+
+<span class="comment">// AFTER — URL-driven, deep-linkable, refresh-safe</span>
+<span class="fix-line">const [searchParams, setSearchParams] = useSearchParams()</span>
+<span class="fix-line">const tab: Tab = (searchParams.get('tab') as Tab) || 'connections'</span>
+<span class="fix-line">const setTab = (t: Tab) => {</span>
+<span class="fix-line">  if (t === 'connections') setSearchParams({}, { replace: true })</span>
+<span class="fix-line">  else setSearchParams({ tab: t }, { replace: true })</span>
+<span class="fix-line">}</span></pre></div>
+      <p>URLs: <span class="inline-code">/connections</span>, <span class="inline-code">/connections?tab=requests</span>, <span class="inline-code">/connections?tab=sent</span>, <span class="inline-code">/admin</span>, <span class="inline-code">/admin?tab=users</span>, <span class="inline-code">/admin?tab=bookings</span></p>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p>Any UI state that should survive a page refresh or be linkable from outside must live in the URL, not in component state. Use <span class="inline-code">useSearchParams</span> for tab/filter/sort state. Use <span class="inline-code">useState</span> only for ephemeral UI state (modal open/close, hover, form input).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUG 23 -->
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-number" style="background:#10b98122;color:#34d399;">#23</div>
+      <div class="bug-header-text">
+        <div class="bug-title">Notifications Page Blank — sendPaginated extra Field Misread</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">Phase 13 — Frontend</span>
+          <span class="tag tag-layer">Frontend / API Contract</span>
+          <span class="tag tag-severity-high">High</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+      <div class="section-title symptom">Symptom</div>
+      <p>The Notifications page showed a blank list even though the database contained 2 notifications and the Network tab confirmed a 200 response with data. The unread count badge also showed 0.</p>
+
+      <div class="section-title cause">Root Cause</div>
+      <p>Two misreads of the <span class="inline-code">sendPaginated</span> response shape:</p>
+      <ol style="padding-left:20px; color:#c9c8d8;">
+        <li>The notification array was read as <span class="inline-code">res.data.notifications</span> — but <span class="inline-code">sendPaginated</span> always puts the array at <span class="inline-code">res.data.data</span>.</li>
+        <li>The unread count was read as <span class="inline-code">res.data.unreadCount</span> — but the notifications endpoint passes it as an <span class="inline-code">extra</span> field via <span class="inline-code">sendPaginated</span>, which buries it at <span class="inline-code">res.data.pagination.extra.unreadCount</span>.</li>
+      </ol>
+
+      <div class="section-title fix">Fix Applied</div>
+      <div class="code-block"><pre><span class="comment">// BEFORE — wrong paths</span>
+<span class="error">notifications: res.data.notifications,</span>
+<span class="error">unreadCount: res.data.unreadCount,</span>
+
+<span class="comment">// AFTER — correct sendPaginated shape</span>
+<span class="fix-line">notifications: res.data.data as NotificationItem[],</span>
+<span class="fix-line">unreadCount: (res.data.pagination?.extra?.unreadCount as number) ?? 0,</span></pre></div>
+      <p>The <span class="inline-code">sendPaginated</span> response contract (must memorize):</p>
+      <div class="code-block"><pre>res.data.data             <span class="comment">// T[] — the array payload</span>
+res.data.pagination       <span class="comment">// { page, limit, total, hasMore }</span>
+res.data.pagination.extra <span class="comment">// optional — endpoint-specific extra data</span></pre></div>
+
+      <div class="section-title lesson">Lesson Learned</div>
+      <div class="lesson-box">
+        <p><span class="inline-code">sendPaginated</span> with an <span class="inline-code">extra</span> parameter places that data inside <span class="inline-code">pagination.extra</span>, not at the response root. This is a fourth variant of the sendPaginated shape confusion (after Bugs #7, #8, #9, #10) — the pattern is clear: always use <span class="inline-code">res.data.data</span> for the array and <span class="inline-code">res.data.pagination</span> for metadata. Never assume a top-level field exists outside these two.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="phase-divider"><span>Summary &amp; Patterns</span></div>
+  <!-- ══════════════════════════════════════════════ -->
+
+  <div class="bug-card" style="border-color:#7c3aed44;">
+    <div class="bug-header" style="background:#7c3aed11;">
+      <div class="bug-number" style="background:#7c3aed33;color:#9f67ff;">★</div>
+      <div class="bug-header-text">
+        <div class="bug-title" style="color:#9f67ff;">Recurring Patterns &amp; Prevention Checklist</div>
+        <div class="bug-meta">
+          <span class="tag tag-phase">All Phases</span>
+          <span class="tag tag-layer">Architecture</span>
+        </div>
+      </div>
+    </div>
+    <div class="bug-body">
+
+      <div class="section-title cause" style="color:#9f67ff;">Pattern 1 — sendPaginated Response Shape (Bugs #7, #8, #9, #10, #23)</div>
+      <p>Five separate pages made the same wrong assumption about the API response shape. <strong>Prevention:</strong> Every <span class="inline-code">sendPaginated</span> response has the same shape — memorize it once and never deviate.</p>
+      <div class="code-block"><pre><span class="comment">// The contract — memorize this, never deviate</span>
+res.data.data              <span class="comment">// → T[]  (the array payload)</span>
+res.data.pagination        <span class="comment">// → { page, limit, total, hasMore }</span>
+res.data.pagination.extra  <span class="comment">// → optional endpoint-specific data (e.g. unreadCount)</span></pre></div>
+
+      <div class="section-title cause" style="color:#9f67ff; margin-top: 20px;">Pattern 2 — Null User Fields (Bugs #11, #17)</div>
+      <p>User-provided fields (fullName, bio, username, avatarUrl, city) are all nullable. <strong>Prevention:</strong> Always type them as <span class="inline-code">string | null</span> in TypeScript interfaces and use optional chaining in display code.</p>
+      <div class="code-block"><pre>user.fullName?.charAt(0)?.toUpperCase() ?? '?'
+user.avatarUrl ?? defaultAvatar</pre></div>
+
+      <div class="section-title cause" style="color:#9f67ff; margin-top: 20px;">Pattern 3 — Cache Not Cleared on Logout (Bug #12)</div>
+      <p>Auth state and query cache have separate lifecycles. <strong>Prevention:</strong> Logout must always clear the query cache before clearing auth tokens.</p>
+      <div class="code-block"><pre><span class="comment">// Correct logout order — always in this sequence</span>
+queryClient.clear()   <span class="fix-line">// 1. Wipe cached data</span>
+logout()              <span class="fix-line">// 2. Clear auth store</span>
+navigate('/login')    <span class="fix-line">// 3. Redirect</span></pre></div>
+
+      <div class="section-title cause" style="color:#9f67ff; margin-top: 20px;">Pattern 4 — URL-Driven vs useState Tab State (Bug #22)</div>
+      <p>Tab state that should be deep-linkable or survive refresh must live in the URL, not in component state. <strong>Prevention:</strong> Use <span class="inline-code">useSearchParams</span> for any tab/filter/sort state that has external dependencies (e.g. notification clicks that deep-link).</p>
+      <div class="code-block"><pre><span class="comment">// Rule: if something outside the component needs to set the tab, use URL state</span>
+<span class="error">const [tab, setTab] = useState('overview')  // ✗ — not linkable from notifications</span>
+<span class="fix-line">const tab = searchParams.get('tab') || 'overview'  // ✓ — /admin?tab=users works</span></pre></div>
+
+      <div class="section-title cause" style="color:#9f67ff; margin-top: 20px;">Pattern 5 — Missing Fields in Prisma Select (Bugs #19)</div>
+      <p>Fields not explicitly included in Prisma <span class="inline-code">select</span> are silently omitted from the response — no error, just <span class="inline-code">undefined</span>. <strong>Prevention:</strong> When a field appears in the DB but not in the UI, check the full chain: DB → select → DTO type → frontend interface → component condition.</p>
+      <div class="code-block"><pre><span class="comment">// Never assume a field is returned — it must be in the select</span>
+select: {
+  id: true, email: true, fullName: true,
+  <span class="fix-line">isAdmin: true,</span>  <span class="comment">// must be explicit or it won't appear in the response</span>
+}</pre></div>
+
+      <div class="section-title cause" style="color:#9f67ff; margin-top: 20px;">Pattern 6 — Infrastructure Startup Order</div>
+      <p><strong>Prevention:</strong> Always follow: Docker Desktop → <span class="inline-code">docker-compose up -d</span> → Server → Frontend. Verify with <span class="inline-code">docker ps</span> before starting the application.</p>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>EventMeet Bug Encounters — Last Updated March 2026</p>
+    <p style="margin-top:6px;">23 bugs documented &nbsp;·&nbsp; All resolved &nbsp;·&nbsp; 0 open issues</p>
+  </div>
+
+</div>
+</body>
+</html>

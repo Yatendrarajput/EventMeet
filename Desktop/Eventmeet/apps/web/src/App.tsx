@@ -6,7 +6,13 @@ import Login      from '@/pages/auth/Login'
 import Register   from '@/pages/auth/Register'
 import Events      from '@/pages/Events'
 import EventDetail  from '@/pages/EventDetail'
-import ComingSoon  from '@/pages/ComingSoon'
+import Profile      from '@/pages/Profile'
+import Connections    from '@/pages/Connections'
+import Conversations  from '@/pages/Conversations'
+import Bookings       from '@/pages/Bookings'
+import BookingNew     from '@/pages/BookingNew'
+import Notifications  from '@/pages/Notifications'
+import Admin          from '@/pages/Admin'
 
 function App() {
   return (
@@ -21,12 +27,13 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/events"        element={<Events />} />
           <Route path="/events/:id"    element={<EventDetail />} />
-          <Route path="/connections"   element={<ComingSoon title="Connections" />} />
-          <Route path="/conversations" element={<ComingSoon title="Messages" />} />
-          <Route path="/bookings"      element={<ComingSoon title="My Bookings" />} />
-          <Route path="/notifications" element={<ComingSoon title="Notifications" />} />
-          <Route path="/profile"       element={<ComingSoon title="Profile" />} />
-          <Route path="/admin"         element={<ComingSoon title="Admin Dashboard" />} />
+          <Route path="/connections"   element={<Connections />} />
+          <Route path="/conversations" element={<Conversations />} />
+          <Route path="/bookings"      element={<Bookings />} />
+          <Route path="/bookings/new"  element={<BookingNew />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/profile"       element={<Profile />} />
+          <Route path="/admin"         element={<Admin />} />
         </Route>
       </Route>
 

@@ -1,11 +1,15 @@
+import { useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   CalendarDays, Users, MessageCircle, Ticket,
-  Bell, Settings, LogOut, Zap, LayoutDashboard,
+  Bell, LogOut, Zap, LayoutDashboard,
 } from 'lucide-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { cn, getInitials } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth.store'
+import { api } from '@/lib/api'
+import { getSocket } from '@/lib/socket'
 
 const navItems = [
   { to: '/events',        icon: CalendarDays,    label: 'Events' },
@@ -16,10 +20,31 @@ const navItems = [
 ]
 
 export function Sidebar() {
-  const { user, logout, isAuth } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const { data: unreadData } = useQuery({
+    queryKey: ['notif-unread-count'],
+    queryFn: async () => {
+      const res = await api.get('/notifications/unread-count')
+      return res.data.data as { unreadCount: number }
+    },
+    refetchInterval: 60_000,
+  })
+  const unreadCount = unreadData?.unreadCount ?? 0
+
+  useEffect(() => {
+    const s = getSocket()
+    const handler = () => {
+      queryClient.invalidateQueries({ queryKey: ['notif-unread-count'] })
+    }
+    s.on('notification:new', handler)
+    return () => { s.off('notification:new', handler) }
+  }, [queryClient])
 
   const handleLogout = () => {
+    queryClient.clear()
     logout()
     navigate('/login')
   }
@@ -55,8 +80,10 @@ export function Sidebar() {
               <>
                 <Icon className={cn('w-4.5 h-4.5 flex-shrink-0', isActive ? 'text-violet' : 'text-text-secondary group-hover:text-text-primary')} />
                 {label}
-                {to === '/notifications' && (
-                  <span className="ml-auto w-2 h-2 rounded-full bg-pink" />
+                {to === '/notifications' && unreadCount > 0 && (
+                  <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-violet text-white text-[10px] font-bold flex items-center justify-center">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
                 )}
               </>
             )}

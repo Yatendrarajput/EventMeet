@@ -31,6 +31,11 @@ export const removeAvailabilityController = asyncHandler(async (req: Request, re
   sendSuccess(res, null, 'Availability removed')
 })
 
+export const getMyAvailabilityController = asyncHandler(async (req: Request, res: Response) => {
+  const availability = await eventsService.getMyAvailability(req.user!.sub, req.params.id)
+  sendSuccess(res, availability)
+})
+
 export const getAvailableUsersController = asyncHandler(async (req: Request, res: Response) => {
   const page  = Number(req.query.page)  || 1
   const limit = Number(req.query.limit) || 10

@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EventMeet — Interview Preparation Guide</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.8; color: #1a1a2e; background: #fff; }
+
+    .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); color: white; text-align: center; padding: 60px 40px; }
+    .cover .badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 6px 20px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px; color: #a78bfa; }
+    .cover h1 { font-size: 52px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; background: linear-gradient(90deg, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .cover .subtitle { font-size: 17px; opacity: 0.8; margin-bottom: 20px; max-width: 680px; }
+    .cover .note { font-size: 13px; opacity: 0.5; max-width: 580px; margin-top: 10px; }
+    .cover .updated { margin-top: 50px; font-size: 12px; opacity: 0.4; }
+
+    .page { max-width: 980px; margin: 0 auto; padding: 60px 40px; }
+    h2 { font-size: 26px; font-weight: 700; color: #302b63; border-bottom: 3px solid #7c3aed; padding-bottom: 10px; margin: 60px 0 24px; }
+    h3 { font-size: 16px; font-weight: 700; color: #1a1a2e; margin: 32px 0 10px; border-left: 4px solid #7c3aed; padding-left: 12px; }
+    h4 { font-size: 13px; font-weight: 700; color: #7c3aed; margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 1px; }
+    p  { margin-bottom: 12px; color: #333; }
+
+    .toc { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 24px 28px; margin: 30px 0; }
+    .toc h3 { margin-top: 0; border: none; padding: 0; margin-bottom: 14px; color: #302b63; }
+    .toc ol { padding-left: 20px; }
+    .toc li { padding: 4px 0; color: #444; font-size: 13px; }
+    .toc a  { color: #5b21b6; text-decoration: none; }
+    .toc a:hover { color: #7c3aed; text-decoration: underline; }
+
+    .q-block { background: #f5f3ff; border-left: 4px solid #7c3aed; border-radius: 0 10px 10px 0; padding: 16px 20px; margin: 20px 0 8px; }
+    .q-block .q { font-weight: 700; color: #302b63; font-size: 14px; margin-bottom: 0; }
+    .q-block .q::before { content: 'Q: '; color: #7c3aed; }
+    .a-block { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 22px; margin-bottom: 24px; }
+    .a-block p { margin-bottom: 10px; }
+    .a-block p:last-child { margin-bottom: 0; }
+
+    .tradeoff { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
+    .tradeoff .label { font-size: 11px; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+
+    .decision { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
+    .decision .label { font-size: 11px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+
+    .warn { background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
+    .warn .label { font-size: 11px; font-weight: 700; color: #9f1239; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+
+    .flow { background: #1a1a2e; color: #e2e8f0; border-radius: 12px; padding: 24px 28px; font-family: 'Courier New', monospace; font-size: 12px; line-height: 2; margin: 16px 0; overflow-x: auto; }
+    .flow .accent { color: #a78bfa; }
+    .flow .green  { color: #34d399; }
+    .flow .yellow { color: #fbbf24; }
+    .flow .red    { color: #f87171; }
+
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+    th { background: #302b63; color: white; padding: 10px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 10px 14px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    tr:hover td { background: #f9f7ff; }
+
+    .tag { display: inline-block; background: #ede9fe; color: #5b21b6; border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 700; margin: 2px; }
+    .tag-red  { background: #fff1f2; color: #9f1239; }
+    .tag-green { background: #f0fdf4; color: #166534; }
+
+    ul { padding-left: 20px; margin-bottom: 12px; }
+    ul li { padding: 3px 0; color: #333; }
+    ol { padding-left: 20px; margin-bottom: 12px; }
+    ol li { padding: 3px 0; color: #333; }
+
+    .section-intro { background: #faf5ff; border-radius: 10px; padding: 18px 22px; margin-bottom: 24px; border: 1px solid #e9d5ff; font-size: 13px; color: #5b21b6; }
+
+    @media print { .cover { page-break-after: always; } }
+  </style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="badge">Interview Preparation — EventMeet Project</div>
+  <h1>EventMeet</h1>
+  <p class="subtitle">A deep-dive into every architectural decision, trade-off, and engineering reasoning behind building EventMeet — from database design to real-time messaging to frontend state management.</p>
+  <p class="note">This document is designed to help you confidently explain your project in technical interviews, answer "why did you choose X over Y" questions, and discuss trade-offs like a senior engineer.</p>
+  <div class="updated">March 2026 &nbsp;|&nbsp; Prepared alongside EventMeet v1.0 development</div>
+</div>
+
+<div class="page">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h3>Table of Contents</h3>
+    <ol>
+      <li><a href="#project-overview">Project Overview — What & Why</a></li>
+      <li><a href="#architecture">Architecture Decisions</a></li>
+      <li><a href="#database">Database Design & Trade-offs</a></li>
+      <li><a href="#auth">Authentication System — Deep Dive</a></li>
+      <li><a href="#realtime">Real-time Architecture — Socket.io</a></li>
+      <li><a href="#booking">Booking System — Race Conditions & Distributed Locks</a></li>
+      <li><a href="#caching">Caching Strategy — Redis</a></li>
+      <li><a href="#queues">Background Jobs — BullMQ</a></li>
+      <li><a href="#frontend">Frontend Architecture Decisions (React Query, Vite, URL state, session expiry, isAdmin)</a></li>
+      <li><a href="#security">Security — What We Implemented & Why</a></li>
+      <li><a href="#scalability">Scalability — What Could Break & How to Fix It</a></li>
+      <li><a href="#mistakes">Bugs Encountered & What We Learned</a></li>
+      <li><a href="#system-design">System Design — If Asked to Design This From Scratch</a></li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 1. OVERVIEW -->
+  <h2 id="project-overview">1. Project Overview — What & Why</h2>
+
+  <div class="section-intro">
+    Before going into technical details, always start with the "what and why" — interviewers want to understand your thought process, not just what you built.
+  </div>
+
+  <div class="q-block"><p class="q">Tell me about your project. What is EventMeet?</p></div>
+  <div class="a-block">
+    <p>EventMeet is a full-stack social discovery platform built around events. The core idea is: people go to concerts, sports matches, tech meetups — but they go alone or with the same 2-3 friends. EventMeet solves the social discovery problem by letting users mark themselves as "going" to an event, discover others attending the same event, connect with them, chat, and book group tickets together.</p>
+    <p>Think of it as the intersection of Eventbrite (event discovery) and Bumble BFF (social matching) — but tightly scoped around shared event attendance.</p>
+    <p><strong>Target audience:</strong> 22–28 year olds who are active socially but want to expand their social circle through shared experiences rather than cold introductions.</p>
+  </div>
+
+  <div class="q-block"><p class="q">What problem does this solve that existing platforms don't?</p></div>
+  <div class="a-block">
+    <p>Existing platforms like Eventbrite or BookMyShow focus on ticket sales — they don't facilitate social connections between attendees. LinkedIn events are professional-only. Facebook Events lost relevance with the 22–28 demographic. There's no platform that specifically says "here are 50 people going to this Coldplay concert — connect with them before the event, book together, and meet in person."</p>
+    <p>EventMeet fills that gap. The availability feature is the key differentiator — before you even buy a ticket, you can mark interest and see who else is going, making group formation possible before the financial commitment.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 2. ARCHITECTURE -->
+  <h2 id="architecture">2. Architecture Decisions</h2>
+
+  <div class="q-block"><p class="q">Why did you choose a monorepo structure?</p></div>
+  <div class="a-block">
+    <p>We used a Turborepo-based monorepo with <code>apps/server</code> and <code>apps/web</code> as separate workspaces. The key benefits:</p>
+    <ul>
+      <li><strong>Shared types:</strong> TypeScript types defined once, used in both frontend and backend — no drift between what the API returns and what the frontend expects.</li>
+      <li><strong>Single git history:</strong> A feature branch covers both frontend and backend changes atomically — you don't need to coordinate across repos.</li>
+      <li><strong>Unified tooling:</strong> One <code>package.json</code> at the root, one ESLint config, one TypeScript config — less maintenance overhead.</li>
+    </ul>
+    <div class="tradeoff">
+      <div class="label">Trade-off</div>
+      <p>Monorepos can become unwieldy at scale (hundreds of packages). For a project this size, it's the right call. At scale (Netflix, Google scale), you'd still use monorepos but with Bazel or more sophisticated build orchestration.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">Why Node.js + Express over alternatives like NestJS, Fastify, or Go?</p></div>
+  <div class="a-block">
+    <p><strong>Why not NestJS:</strong> NestJS adds a lot of structure (decorators, DI container, modules) which is excellent for large teams with strict conventions. For a project where one developer is making all the decisions, it adds ceremony without proportional benefit. We replicated the module structure manually — <code>auth.service.ts</code>, <code>auth.controller.ts</code>, <code>auth.routes.ts</code> — giving us the same separation of concerns with less magic.</p>
+    <p><strong>Why not Fastify:</strong> Fastify is faster than Express in benchmarks (~2x throughput) but the ecosystem maturity and middleware availability still favors Express for a full-featured application. The performance difference matters at 10,000+ req/sec — not relevant at development stage.</p>
+    <p><strong>Why not Go:</strong> The frontend is TypeScript. Using TypeScript on the backend allows sharing of Zod schemas, types, and utilities. A Go backend would require maintaining two separate type systems.</p>
+    <div class="decision">
+      <div class="label">Decision</div>
+      <p>Express + TypeScript is the pragmatic choice: massive ecosystem, team familiarity, type safety, and the ability to share code with the frontend. The architecture is modular enough to migrate individual modules to a faster runtime (Bun, Fastify) later if needed.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">Explain your module structure. How is the code organized?</p></div>
+  <div class="a-block">
+    <p>Each feature is a self-contained module with four files:</p>
+    <ul>
+      <li><strong>types.ts</strong> — TypeScript interfaces for inputs and outputs</li>
+      <li><strong>schema.ts</strong> — Zod validation schemas for request bodies</li>
+      <li><strong>service.ts</strong> — Business logic, database queries, cache operations</li>
+      <li><strong>controller.ts</strong> — HTTP layer: parse request → call service → send response</li>
+      <li><strong>routes.ts</strong> — Express router: URL mapping + middleware chain</li>
+    </ul>
+    <p>This separation means the service layer has zero knowledge of HTTP — it just takes typed inputs and returns typed outputs. This makes testing easier (you can unit test the service without spinning up Express) and makes the business logic readable without parsing through HTTP boilerplate.</p>
+    <div class="decision">
+      <div class="label">Why this matters in interviews</div>
+      <p>This is the repository pattern + service layer pattern. When asked "how would you add unit tests?", the answer is: mock the Prisma client, call service functions directly — no HTTP setup needed.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 3. DATABASE -->
+  <h2 id="database">3. Database Design & Trade-offs</h2>
+
+  <div class="q-block"><p class="q">Why PostgreSQL over MongoDB for this project?</p></div>
+  <div class="a-block">
+    <p>EventMeet has inherently relational data. Consider the booking flow:</p>
+    <ul>
+      <li>A <strong>User</strong> initiates a <strong>Booking</strong></li>
+      <li>A Booking is for an <strong>Event</strong></li>
+      <li>An Event has <strong>EventSections</strong> with limited seats</li>
+      <li>A Booking has multiple <strong>BookingParticipants</strong></li>
+      <li>Confirmed Bookings generate <strong>Tickets</strong></li>
+      <li>Cancelled Bookings create <strong>Refunds</strong></li>
+    </ul>
+    <p>These relationships have strict referential integrity requirements — a ticket should NEVER exist without a valid booking, a booking should NEVER reference a non-existent event. PostgreSQL foreign keys enforce this at the database level, not just the application level.</p>
+    <p><strong>MongoDB would work</strong> for the social/discovery parts (availability, notifications) where the data is document-like. But embedding booking data in MongoDB documents would either create massive documents or require manual joins in application code — which PostgreSQL does natively with JOIN queries.</p>
+    <div class="tradeoff">
+      <div class="label">Trade-off we accepted</div>
+      <p>PostgreSQL requires schema migrations — adding a new column requires a migration file and a deploy step. MongoDB is schema-less which allows faster iteration. We accepted this trade-off because the domain (payments, tickets, seats) requires the data integrity guarantees that only a relational database provides.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">Why Prisma ORM over raw SQL or other ORMs like Sequelize or TypeORM?</p></div>
+  <div class="a-block">
+    <p><strong>Prisma vs raw SQL:</strong> Raw SQL gives maximum performance and flexibility. But for a TypeScript application, raw SQL results are untyped — you lose all compile-time safety. Prisma generates a fully typed client from the schema, so <code>prisma.user.findUnique()</code> returns a typed <code>User</code> object — TypeScript catches errors before runtime.</p>
+    <p><strong>Prisma vs Sequelize:</strong> Sequelize is model-class based (define your models as classes). Prisma uses a schema-first approach — one <code>schema.prisma</code> file is the single source of truth for your database structure. Prisma's developer experience (auto-complete, type inference) is significantly better than Sequelize's.</p>
+    <p><strong>Prisma vs TypeORM:</strong> TypeORM uses decorators to define schemas inline with class definitions — the schema and the TypeScript class are tangled together. Prisma keeps them separate. Prisma also has better support for complex queries and its migration system is more reliable.</p>
+    <div class="decision">
+      <div class="label">Key advantage we used</div>
+      <p>Prisma's <code>$transaction()</code> was critical for the booking flow — we used it to atomically decrement seat counts AND create the booking record in a single database transaction. If either step fails, both roll back. This is impossible to achieve safely without transaction support.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">Walk me through your database schema design. How did you handle complex relationships?</p></div>
+  <div class="a-block">
+    <p>The schema has 21 tables organized into 7 domains:</p>
+    <ol>
+      <li><strong>Identity & Trust:</strong> User, CreditBalance — core user profile and credit ledger</li>
+      <li><strong>Events:</strong> Event, EventSection, EventAvailability, Venue — event catalog with section-based seating</li>
+      <li><strong>Social Graph:</strong> ConnectionRequest — bidirectional connection with event context (connections are always event-scoped)</li>
+      <li><strong>Conversations:</strong> Conversation, ConversationMember, Message, GroupInvite — group and DM messaging</li>
+      <li><strong>Bookings:</strong> Booking, BookingParticipant, BookingInvite, Ticket, Refund — the full ticketing lifecycle</li>
+      <li><strong>Credits:</strong> CreditTransaction, DiscountRule — double-entry credit ledger</li>
+      <li><strong>Feedback:</strong> Rating, Notification — post-event ratings and notification feed</li>
+    </ol>
+    <p><strong>Interesting design decisions:</strong></p>
+    <ul>
+      <li>Connections are scoped to an event (<code>eventId</code> is required on ConnectionRequest) — this prevents random connection requests and gives context to every relationship.</li>
+      <li>EventSection has both <code>totalSeats</code> and <code>availableSeats</code> — we track both so we can calculate fill percentage and never allow overselling without querying all tickets.</li>
+      <li>Soft deletes on User and Event (<code>deletedAt</code> column) — data is never actually deleted, which is critical for audit trails and support tickets.</li>
+      <li>All PKs use PostgreSQL's <code>gen_random_uuid()</code> — UUIDs are generated at the database level, not application level, preventing duplicate key errors in distributed scenarios.</li>
+    </ul>
+  </div>
+
+  <div class="q-block"><p class="q">What are soft deletes and why did you use them?</p></div>
+  <div class="a-block">
+    <p>Soft delete means instead of physically <code>DELETE</code>-ing a row, you set a <code>deletedAt</code> timestamp. The row still exists in the database but all queries filter it out with <code>WHERE deleted_at IS NULL</code>.</p>
+    <p><strong>Why we used it:</strong></p>
+    <ul>
+      <li><strong>Audit trail:</strong> If a user disputes a charge after deleting their account, their data still exists for support investigation.</li>
+      <li><strong>Foreign key integrity:</strong> If a user is hard-deleted, all their bookings, tickets, ratings, messages would need to CASCADE delete or SET NULL — creating complex dependency chains. Soft delete avoids this entirely.</li>
+      <li><strong>Recovery:</strong> Users who "delete" their account can reactivate it later.</li>
+      <li><strong>GDPR compliance path:</strong> You can implement a scheduled job to hard-delete records older than 30 days after soft delete — giving you a grace period while still being able to purge on demand.</li>
+    </ul>
+    <div class="tradeoff">
+      <div class="label">Trade-off</div>
+      <p>Every query must include <code>deletedAt: null</code> in the where clause — forgetting this is a bug that exposes deleted data. In production, you'd enforce this at the ORM middleware level (Prisma middleware) so it's applied automatically. We handle it manually per query currently.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 4. AUTH -->
+  <h2 id="auth">4. Authentication System — Deep Dive</h2>
+
+  <div class="q-block"><p class="q">Explain your authentication flow. Why JWT over sessions?</p></div>
+  <div class="a-block">
+    <p>We use a dual-token JWT system:</p>
+    <ul>
+      <li><strong>Access Token:</strong> Short-lived (15 minutes), sent in every API request header (<code>Authorization: Bearer</code>), stored in sessionStorage on the frontend.</li>
+      <li><strong>Refresh Token:</strong> Long-lived (30 days), sent only to the <code>/auth/refresh</code> endpoint, stored in an httpOnly cookie — completely inaccessible to JavaScript.</li>
+    </ul>
+    <p><strong>Why JWT over server-side sessions:</strong> Sessions require the server to store session state — in a distributed system (multiple server instances), every request must hit the same server or you need a shared session store (Redis). JWTs are stateless — any server can verify a token by checking the signature with the shared secret. This makes horizontal scaling trivial.</p>
+    <div class="tradeoff">
+      <div class="label">The JWT trade-off everyone asks about</div>
+      <p>JWTs can't be invalidated before expiry. If an access token is stolen, the attacker has 15 minutes of access — there's no way to "cancel" it. This is why we keep access tokens short-lived (15 min) and store them in sessionStorage (not localStorage — sessionStorage is cleared when the tab closes). The refresh token in httpOnly cookie is the real long-term credential — and we DO store a hash of it in Redis so we can invalidate it on logout.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">Why store the refresh token in an httpOnly cookie instead of localStorage?</p></div>
+  <div class="a-block">
+    <p>This is a critical security decision. <strong>localStorage is accessible to any JavaScript running on the page</strong> — including third-party scripts, browser extensions, or XSS injection. If an attacker injects malicious JavaScript, they can steal your refresh token with one line: <code>localStorage.getItem('refresh_token')</code>.</p>
+    <p>An <strong>httpOnly cookie</strong> cannot be read by JavaScript at all — only the browser sends it automatically with requests to the matching domain. An XSS attack cannot steal it.</p>
+    <p>We also set <code>Secure</code> (only sent over HTTPS) and <code>SameSite=Strict</code> (not sent on cross-site requests, preventing CSRF) on the cookie.</p>
+    <div class="decision">
+      <div class="label">The resulting security model</div>
+      <p>An XSS attacker can steal the access token from sessionStorage (15-min window). They cannot steal the refresh token. So their access expires in 15 minutes maximum. Compare this to localStorage with a 30-day refresh token — the attacker has 30 days of persistent access.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">What is the email verification flow and why is it needed?</p></div>
+  <div class="a-block">
+    <p>On registration, we generate a random secure token, store it hashed in the database, and "email" it to the user (in dev mode, we log it to the console). The user must submit this token to verify ownership of the email address.</p>
+    <p><strong>Why:</strong> Without verification, anyone can register with someone else's email address. This has real consequences — the legitimate email owner starts receiving event notifications, booking confirmations, and marketing emails for an account they didn't create. Email verification proves ownership before any communication is sent.</p>
+    <p>We also block certain actions (like booking) until the email is verified — this reduces fake account creation since a verified email requires access to a real mailbox.</p>
+  </div>
+
+  <div class="q-block"><p class="q">How does the forgot password / reset password flow work securely?</p></div>
+  <div class="a-block">
+    <p>The flow: User submits email → server generates a random 32-byte hex token → stores the SHA-256 hash (not the raw token) in the database with a 1-hour expiry → sends the raw token to the user's email → user submits the token + new password → server hashes the submitted token and compares to the stored hash → if match, update password and delete the reset record.</p>
+    <p><strong>Security details:</strong></p>
+    <ul>
+      <li>We store the HASH of the token, not the raw token — if the database is breached, the attacker can't use the stored hashes to reset passwords.</li>
+      <li>The response to <code>POST /forgot-password</code> is always the same message ("If this email exists, we've sent a reset link") regardless of whether the email is registered — this prevents email enumeration attacks where an attacker discovers which emails have accounts.</li>
+      <li>Tokens expire after 1 hour and are single-use (deleted on successful reset).</li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 5. REALTIME -->
+  <h2 id="realtime">5. Real-time Architecture — Socket.io</h2>
+
+  <div class="q-block"><p class="q">How does your real-time messaging work? Why Socket.io?</p></div>
+  <div class="a-block">
+    <p>We use Socket.io with the Redis adapter. Here's the architecture:</p>
+    <ol>
+      <li>When a user connects via WebSocket, they authenticate with their access token.</li>
+      <li>The server verifies the JWT and joins the socket to a private room: <code>user:&lt;userId&gt;</code>.</li>
+      <li>When any server-side event occurs (new message, booking confirmed, connection request), the server emits to the target user's room.</li>
+      <li>The Redis adapter ensures all Socket.io events are broadcast across ALL server instances — if the sender is on Server 1 and the recipient is on Server 2, the message still arrives via Redis pub/sub.</li>
+    </ol>
+    <p><strong>Why Socket.io over raw WebSockets:</strong> Socket.io handles reconnection automatically, falls back to HTTP long-polling when WebSockets aren't available (corporate proxies, firewalls), provides rooms natively, and has excellent error handling. Raw WebSockets would require reimplementing all of this.</p>
+    <div class="tradeoff">
+      <div class="label">Trade-off</div>
+      <p>Socket.io is heavier than raw WebSockets — it adds ~100ms connection overhead for the handshake and transport negotiation. For a chat application, this is acceptable. For real-time gaming or financial trading, you'd use raw WebSockets or a protocol like QUIC.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">Why do you need the Redis adapter for Socket.io?</p></div>
+  <div class="a-block">
+    <p>Without the Redis adapter, Socket.io state is in-memory — only on the current server instance. If you run 3 server instances behind a load balancer:</p>
+    <ul>
+      <li>User A's socket is on Server 1</li>
+      <li>User B's socket is on Server 2</li>
+      <li>When User A sends a message to User B, Server 1 tries to emit to User B's room — but User B isn't connected to Server 1, so the message is lost.</li>
+    </ul>
+    <p>The Redis adapter solves this by using Redis pub/sub as a message bus. Server 1 publishes the event to Redis → Redis broadcasts to all subscribed servers → Server 2 receives it and delivers to User B's socket.</p>
+    <p>This is the standard pattern for horizontally scaling WebSocket servers. It's why we set up Redis from day one even before real-time features — we knew we'd need it.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 6. BOOKING -->
+  <h2 id="booking">6. Booking System — Race Conditions & Distributed Locks</h2>
+
+  <div class="q-block"><p class="q">This is the most interesting part — explain your seat booking system and how you handle concurrent bookings.</p></div>
+  <div class="a-block">
+    <p>Seat booking is a classic distributed systems problem. Imagine 100 people trying to book the last 5 seats simultaneously. Without proper concurrency control, all 100 might read "5 seats available", all 100 might proceed to book, and you end up with 100 confirmed bookings for 5 seats — that's overselling.</p>
+
+    <p><strong>Our solution: Redis distributed lock + Prisma transaction</strong></p>
+    <div class="flow">
+<span class="yellow">Concurrent Request A:</span>
+  redis.SET seat-lock:eventId:sectionId "1" EX 10 NX
+  → <span class="green">returns "OK" (lock acquired)</span>
+  → proceed to check seats in DB
+  → Prisma $transaction:
+      UPDATE event_sections SET available_seats = available_seats - N
+      INSERT INTO bookings (...)
+      INSERT INTO booking_participants (...)
+  → redis.DEL seat-lock (release lock)
+
+<span class="red">Concurrent Request B (arrives 2ms later):</span>
+  redis.SET seat-lock:eventId:sectionId "1" EX 10 NX
+  → <span class="red">returns NULL (lock already held)</span>
+  → immediately return 409 SEAT_LOCK_BUSY
+  → client retries after a brief pause
+    </div>
+
+    <p><strong>Key details:</strong></p>
+    <ul>
+      <li>The <code>SET NX EX</code> command is atomic in Redis — "set this key only if it doesn't exist, and expire it automatically after 10 seconds". The atomicity is critical — you can't have a race condition in the lock acquisition itself.</li>
+      <li>The 10-second TTL is a safety net — if the server crashes holding the lock, it auto-releases after 10 seconds. Without this, a crashed server could hold the lock forever, blocking all future bookings.</li>
+      <li>We re-check seat availability INSIDE the lock — the check before the lock is an optimization (fail fast without acquiring the lock if seats are obviously gone), but the authoritative check is inside the transaction.</li>
+      <li>The Prisma <code>$transaction</code> ensures the seat decrement and booking creation are atomic — either both succeed or both roll back.</li>
+    </ul>
+
+    <div class="tradeoff">
+      <div class="label">Trade-off we accepted</div>
+      <p>Our lock is at the section level (all requests for the same section queue behind the lock). At extreme scale (millions of concurrent bookings for a Taylor Swift concert), a single Redis lock becomes a bottleneck. The production solution would be a queue-based system where booking requests are queued in Redis lists (RPUSH/BLPOP) and processed sequentially — no lock contention, but higher latency.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">What is a soft reservation and why did you implement it?</p></div>
+  <div class="a-block">
+    <p>When a user creates a booking, their seats are immediately reserved (available_seats is decremented) and the booking enters <code>PAYMENT_PENDING</code> status with a 15-minute expiry (<code>softReservationExpiresAt</code>).</p>
+    <p><strong>Why:</strong> Imagine going through a checkout flow — entering your payment details, your name, your address — only to find out at the final step that the seats were sold out because someone else confirmed payment 1 second before you. That's terrible UX. The soft reservation guarantees you have 15 minutes to complete payment before your reserved seats are released back to the pool.</p>
+    <p><strong>What happens on expiry:</strong> A BullMQ job (booking-expiry queue) should fire when the reservation expires, reset the booking to CANCELLED, and increment available_seats back. We have the queue configured — the worker implementation would be wired in Phase 14.</p>
+    <div class="tradeoff">
+      <div class="label">Trade-off</div>
+      <p>Soft reservations temporarily reduce visible availability. If 50 people are in checkout flows, 50 seats appear "gone" to other users. This can make events look sold out when they're not. The mitigation is a reasonable short expiry (15 min) and a visible countdown timer in the UI. Ticketmaster uses this pattern — you see the "Your session expires in 10:00" countdown.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 7. CACHING -->
+  <h2 id="caching">7. Caching Strategy — Redis</h2>
+
+  <div class="q-block"><p class="q">What do you cache and what do you not cache? How did you decide?</p></div>
+  <div class="a-block">
+    <p>We cache data that is: <strong>read frequently, written infrequently, and where slightly stale data is acceptable</strong>.</p>
+    <table>
+      <tr><th>What we cache</th><th>TTL</th><th>Reasoning</th></tr>
+      <tr><td>Event list (by filters)</td><td>2 min</td><td>Browsed thousands of times, updated rarely. 2-min stale is fine.</td></tr>
+      <tr><td>Event detail</td><td>5 min</td><td>Same — event description/venue doesn't change every minute.</td></tr>
+      <tr><td>Available users for event</td><td>30 sec</td><td>Social data — needs to feel live, but not truly real-time.</td></tr>
+      <tr><td>Refresh token validity</td><td>30 days</td><td>Redis as source of truth for logout invalidation.</td></tr>
+    </table>
+    <table>
+      <tr><th>What we don't cache</th><th>Reasoning</th></tr>
+      <tr><td>Available seat count</td><td>Must be real-time — stale seat counts cause overselling</td></tr>
+      <tr><td>Booking status</td><td>User must see accurate payment state immediately</td></tr>
+      <tr><td>User profile (own)</td><td>User must see their own updates instantly</td></tr>
+      <tr><td>Payment verification</td><td>Never cache payment data — must always hit the payment gateway</td></tr>
+    </table>
+    <div class="decision">
+      <div class="label">Cache invalidation strategy</div>
+      <p>When an admin updates an event, we delete the event detail cache key. When a new event is created, we could invalidate all event list caches — but instead we let them expire naturally (2 min max staleness) since the new event will appear soon anyway. For seat counts specifically, we bypass cache entirely and always read from PostgreSQL.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">Redis is doing three different jobs in your system. Isn't that a problem?</p></div>
+  <div class="a-block">
+    <p>Redis serves as: (1) application cache, (2) Socket.io pub/sub adapter, (3) BullMQ job queue storage, (4) distributed lock storage, (5) refresh token store.</p>
+    <p>For development and early production, a single Redis instance is fine. The concern is that in production, if Redis goes down, all five functions fail simultaneously. The mitigation:</p>
+    <ul>
+      <li><strong>Redis Sentinel or Cluster</strong> for high availability — automatic failover if the primary goes down.</li>
+      <li>Separate Redis instances per concern at scale — one for cache (can lose data), one for queues (needs persistence), one for real-time (needs low latency). This is what companies like Stripe and Airbnb do.</li>
+    </ul>
+    <p>For our scale (thousands of users, not millions), a single Redis with persistence (RDB snapshots) is the right call — simpler to operate, cheaper to run.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 8. QUEUES -->
+  <h2 id="queues">8. Background Jobs — BullMQ</h2>
+
+  <div class="q-block"><p class="q">Why use a job queue for ticket generation? Why not do it synchronously?</p></div>
+  <div class="a-block">
+    <p>When a booking is confirmed, we need to: generate QR codes, create PDF tickets, send email confirmations to all participants, update booking status, potentially send push notifications. If we do all of this synchronously in the HTTP request, the API response could take 5–10 seconds. That's terrible UX.</p>
+    <p>Instead, the API response returns immediately ("Booking confirmed — tickets are being generated"), and a BullMQ job is queued to handle all the heavy lifting asynchronously. The user gets instant feedback; the tickets arrive a few seconds later.</p>
+    <p><strong>Additional benefits of a queue:</strong></p>
+    <ul>
+      <li><strong>Retry on failure:</strong> If the email service is temporarily down, the job retries with exponential backoff (2s, 4s, 8s...) automatically — no manual intervention.</li>
+      <li><strong>Rate limiting:</strong> You can process at most N jobs per second, preventing overwhelming downstream services (email providers have API rate limits).</li>
+      <li><strong>Observability:</strong> BullMQ keeps a record of completed, failed, and retrying jobs — you can see exactly what happened and why.</li>
+    </ul>
+    <div class="tradeoff">
+      <div class="label">Trade-off</div>
+      <p>Eventual consistency — the user sees "confirmed" but doesn't have the ticket yet. This requires the UI to show a loading/generating state. For most users, this is fine. For high-anxiety scenarios (ticket gate opens in 5 minutes), you'd want synchronous generation with a tight timeout.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 9. FRONTEND -->
+  <h2 id="frontend">9. Frontend Architecture Decisions</h2>
+
+  <div class="q-block"><p class="q">Why TanStack Query (React Query) over Redux for server state?</p></div>
+  <div class="a-block">
+    <p>Redux is a state management library — excellent for client state (UI state, user preferences, form state). But developers often use Redux for server state too (fetching, caching API responses), which creates significant boilerplate: actions, reducers, thunks/sagas, loading states, error states, cache invalidation logic — all manual.</p>
+    <p>TanStack Query is purpose-built for server state. It handles: fetching, background refetching, stale-while-revalidate, cache invalidation, loading/error/success states — all declaratively with <code>useQuery</code>.</p>
+    <div class="flow">
+<span class="red">Redux approach (server state):</span>
+  action: FETCH_EVENTS_REQUEST
+  action: FETCH_EVENTS_SUCCESS (payload: events)
+  action: FETCH_EVENTS_FAILURE (payload: error)
+  reducer: handle all three cases
+  thunk: async function with try/catch
+  component: useSelector + useDispatch
+  cache invalidation: manual
+
+<span class="green">React Query approach:</span>
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['events', filters],
+    queryFn: () => api.get('/events', { params: filters })
+  })
+  // That's it. Cache, loading, error, refetch — all handled.
+    </div>
+    <div class="decision">
+      <div class="label">What we use Zustand for (client state)</div>
+      <p>Zustand manages the auth store: <code>{ user, accessToken, setUser, setToken, logout, hydrate }</code>. This is true client state — it doesn't come from the server, it's derived from the login flow. Zustand is chosen over Redux because its API is much simpler (no actions, no reducers, just a store object with methods) and it's tiny (1KB vs Redux ~10KB + RTK).</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">Why Vite over Create React App?</p></div>
+  <div class="a-block">
+    <p>Create React App (CRA) is deprecated. Vite is the modern standard. The practical difference:</p>
+    <ul>
+      <li><strong>Dev server start:</strong> CRA bundles everything before serving (~10-30 seconds). Vite serves files unbundled using native ES modules — the dev server starts in under 1 second.</li>
+      <li><strong>Hot Module Replacement:</strong> CRA re-bundles on every save. Vite replaces only the changed module — HMR is near-instant.</li>
+      <li><strong>Production build:</strong> Vite uses Rollup for production builds, which produces smaller bundles than CRA's Webpack config.</li>
+    </ul>
+  </div>
+
+  <div class="q-block"><p class="q">Why sessionStorage for the access token instead of localStorage or a cookie?</p></div>
+  <div class="a-block">
+    <p><strong>localStorage:</strong> Persists across browser sessions (tabs, closes, restarts). XSS attackers can steal it. Long-lived access tokens in localStorage are a known attack vector.</p>
+    <p><strong>sessionStorage:</strong> Cleared when the tab closes. XSS can still steal it within a session, but the blast radius is smaller — the attacker's session ends with the tab. For a 15-minute access token, this is an acceptable trade-off. The refresh token (long-term credential) is in an httpOnly cookie — impossible to steal via XSS.</p>
+    <p><strong>Memory only (no storage):</strong> The most secure option — the token lives in a JavaScript variable. Cleared on page refresh. Requires re-authentication every refresh. We chose sessionStorage as a middle ground — users don't have to log in on every page refresh, but tokens don't persist across browser restarts.</p>
+  </div>
+
+  <div class="q-block"><p class="q">How do you handle URL-driven tab state — why not useState?</p></div>
+  <div class="a-block">
+    <p>On the Connections and Admin pages, tabs are driven by URL query params (<code>/connections?tab=requests</code>) using React Router v6's <code>useSearchParams</code> hook — not <code>useState</code>. There are three concrete reasons why this matters:</p>
+    <ol>
+      <li><strong>Deep-linking:</strong> The Notifications page navigates to <code>/connections?tab=requests</code> when a user clicks a connection request notification. With <code>useState</code>, the page always mounts on the default tab and ignores the query param. With <code>useSearchParams</code>, the tab is determined from the URL on every render.</li>
+      <li><strong>Refresh persistence:</strong> Refreshing the page keeps you on the same tab. With <code>useState</code>, a refresh always resets to tab 1.</li>
+      <li><strong>Browser history:</strong> Tab switches become navigable history entries — the back button works as expected.</li>
+    </ol>
+    <div class="flow">
+<span class="red">useState (anti-pattern for tab state):</span>
+  - Notification navigates to /connections?tab=requests
+  - Page mounts, useState initializes to 'connections'
+  - Query param is ignored → user lands on wrong tab
+
+<span class="green">useSearchParams (correct pattern):</span>
+  - Notification navigates to /connections?tab=requests
+  - Page mounts, reads searchParams.get('tab') → 'requests'
+  - Correct tab selected immediately
+    </div>
+    <div class="decision">
+      <div class="label">Rule of Thumb</div>
+      <p>Use <code>useSearchParams</code> when: state must survive refresh, state can be set from outside the component (navigation), or state should be bookmarkable/shareable. Use <code>useState</code> for purely ephemeral UI state (modal open/close, hover state, form input).</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">How do you handle session expiry — what happens when a token expires mid-session?</p></div>
+  <div class="a-block">
+    <p>We handle session expiry at the Axios interceptor level, so no individual page needs to handle 401s. The flow:</p>
+    <ol>
+      <li>Any API request that returns <code>401 Unauthorized</code> triggers the response interceptor.</li>
+      <li>The interceptor automatically calls <code>POST /auth/refresh</code> using the httpOnly cookie (the refresh token). This is attempted once per request (<code>_retry</code> flag prevents infinite loops).</li>
+      <li>If the refresh succeeds: the new access token is stored in sessionStorage, the original request is retried with the new token — the user sees no interruption.</li>
+      <li>If the refresh fails (e.g. refresh token also expired): show a <code>toast.error('Session expired. Please sign in again.')</code>, then redirect to <code>/login</code> after 1500ms. The delay ensures the user can read the message before being redirected.</li>
+    </ol>
+    <div class="flow">
+API request → 401
+  → try POST /auth/refresh (httpOnly cookie)
+    → <span class="green">success:</span> store new token → retry original request → user sees nothing
+    → <span class="red">fail:</span> toast.error('Session expired') → setTimeout 1500ms → /login
+    </div>
+    <div class="tradeoff">
+      <div class="label">Why toast + delay instead of immediate redirect?</div>
+      <p>Immediately redirecting on 401 is jarring — the user's current work disappears without explanation. The 1500ms delay with a visible toast gives enough time to read the message while being fast enough to not feel broken. This is the UX pattern used by most production apps (GitHub, Notion, etc.).</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">How do you keep data fresh across pages — explain React Query cache invalidation strategy.</p></div>
+  <div class="a-block">
+    <p>React Query caches API responses by query key. The challenge: when action on Page A affects data shown on Page B, Page B needs to refetch. We handle this with <code>queryClient.invalidateQueries()</code> called in mutation <code>onSuccess</code> callbacks.</p>
+    <p><strong>Concrete example — sending a connection request from EventDetail:</strong></p>
+    <div class="flow">
+User clicks "Connect" on EventDetail /events/123
+  → POST /connections/events/123/users/456 (mutation)
+    → onSuccess:
+        toast.success('Connection request sent!')
+        <span class="green">queryClient.invalidateQueries(['connections-sent'])</span>
+  → User navigates to /connections?tab=sent
+    → useQuery(['connections-sent']) sees its cache is stale
+    → refetches automatically → shows the new request immediately
+    </div>
+    <p><strong>Notification badge updates:</strong> The sidebar badge for notifications is driven by <code>useQuery(['notif-unread-count'])</code>. When a new notification arrives via Socket.io, the <code>socket.on('notification:new')</code> handler calls <code>queryClient.invalidateQueries(['notif-unread-count'])</code> — the badge updates in real time without polling. A 60-second interval fallback covers missed socket events.</p>
+    <div class="decision">
+      <div class="label">invalidateQueries vs setQueryData</div>
+      <p><code>invalidateQueries</code> marks the cache as stale and triggers a background refetch on next render. <code>setQueryData</code> directly mutates the cache with optimistic data. We use <code>invalidateQueries</code> because the backend is the source of truth — we refetch rather than guess. Optimistic updates would be appropriate for toggle actions (like/unlike) where the new state is known before the API responds.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">How did you handle isAdmin access control — from database to UI?</p></div>
+  <div class="a-block">
+    <p>Admin access is enforced at three layers — each is necessary, none is sufficient alone:</p>
+    <table>
+      <tr><th>Layer</th><th>What it does</th><th>What happens if missing</th></tr>
+      <tr><td><strong>Database</strong></td><td><code>is_admin: boolean</code> column on users table</td><td>No persistent record of who is admin</td></tr>
+      <tr><td><strong>Backend middleware</strong></td><td><code>requireAdmin</code> middleware checks <code>req.user.isAdmin</code></td><td>Any authenticated user can call admin endpoints</td></tr>
+      <tr><td><strong>Frontend sidebar</strong></td><td><code>{user?.isAdmin &amp;&amp; &lt;AdminLink /&gt;}</code></td><td>Admin link hidden but endpoints still accessible via direct URL</td></tr>
+      <tr><td><strong>Frontend route</strong></td><td>ProtectedRoute wraps admin page — non-admins get 403 from API anyway</td><td>Admin page renders but all queries return 403</td></tr>
+    </table>
+    <p>The key bug we encountered: <code>isAdmin</code> was not included in the Prisma <code>select</code> in the login service. The field was in the DB and in the Zod schema, but never fetched — so the Zustand auth store always had <code>isAdmin: undefined</code>, which is falsy. The sidebar condition never rendered the link. The fix was adding <code>isAdmin: true</code> to the login select and <code>isAdmin: boolean</code> to the <code>AuthUser</code> interface.</p>
+    <div class="warn">
+      <div class="label">Important: Session Data is Stale</div>
+      <p>The Zustand auth store holds the user object from login time. If <code>isAdmin</code> is toggled in the DB after a user is already logged in, they won't see the change until they sign out and sign in again. For production: add a <code>GET /auth/me</code> call on app load that refreshes the user object in the store.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 10. SECURITY -->
+  <h2 id="security">10. Security — What We Implemented & Why</h2>
+
+  <div class="q-block"><p class="q">What security measures did you implement?</p></div>
+  <div class="a-block">
+    <table>
+      <tr><th>Measure</th><th>Implementation</th><th>Protects Against</th></tr>
+      <tr><td>Helmet.js</td><td>Sets 12 HTTP security headers automatically</td><td>XSS, clickjacking, MIME sniffing, protocol downgrade attacks</td></tr>
+      <tr><td>CORS</td><td>Whitelist of allowed origins (localhost:5173 in dev, prod domain in prod)</td><td>Cross-site request forgery from unauthorized origins</td></tr>
+      <tr><td>Rate Limiting</td><td>express-rate-limit: 10 req/15min for auth, 100 req/min for general API</td><td>Brute force attacks, credential stuffing</td></tr>
+      <tr><td>Password Hashing</td><td>bcrypt with cost factor 12</td><td>Password database breach</td></tr>
+      <tr><td>JWT Secrets</td><td>Separate secrets for access and refresh tokens, min 32 chars</td><td>Token forgery</td></tr>
+      <tr><td>httpOnly Cookie</td><td>Refresh token in Secure + SameSite=Strict cookie</td><td>XSS token theft</td></tr>
+      <tr><td>Input Validation</td><td>Zod schemas on all request bodies, URL params, query strings</td><td>Injection attacks, malformed data</td></tr>
+      <tr><td>Email enumeration prevention</td><td>Identical response for registered and unregistered emails</td><td>Account enumeration</td></tr>
+      <tr><td>Admin authorization</td><td>Separate <code>requireAdmin</code> middleware checking <code>user.isAdmin</code></td><td>Privilege escalation</td></tr>
+    </table>
+  </div>
+
+  <div class="q-block"><p class="q">What is the bcrypt cost factor and how did you choose 12?</p></div>
+  <div class="a-block">
+    <p>bcrypt's cost factor (also called work factor) determines how computationally expensive hashing is. Cost factor 12 means the algorithm performs 2^12 = 4,096 iterations. Each increment doubles the time — cost 13 takes twice as long as cost 12.</p>
+    <p>At cost 12, hashing takes approximately 250–400ms on a modern CPU. This means an attacker with a stolen database can only attempt ~2-4 password guesses per second per CPU core — making brute force infeasible for strong passwords.</p>
+    <p>The trade-off: every login costs 250ms in CPU time. At 1,000 concurrent logins/second, that's significant CPU load. Companies like GitHub use cost 10-11 for this reason. Cost 12 is the OWASP recommendation for 2024 and appropriate for most applications.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 11. SCALABILITY -->
+  <h2 id="scalability">11. Scalability — What Could Break & How to Fix It</h2>
+
+  <div class="q-block"><p class="q">What are the bottlenecks in your current architecture?</p></div>
+  <div class="a-block">
+    <p>Being honest about limitations is what separates senior engineers from junior ones. Here are the real bottlenecks:</p>
+
+    <h4>1. Single Redis instance</h4>
+    <p>Redis handles cache, queues, locks, pub/sub, and token storage. A single Redis failure takes down all five functions simultaneously. Fix: Redis Sentinel (primary-replica with automatic failover) or Redis Cluster.</p>
+
+    <h4>2. Seat lock serialization</h4>
+    <p>Our distributed lock processes one booking per section at a time. For a Coldplay concert with 50,000 concurrent booking attempts, this is a severe bottleneck. Fix: Move to a database-level optimistic concurrency control with <code>SELECT FOR UPDATE SKIP LOCKED</code> — PostgreSQL can handle this with much higher throughput than a Redis lock.</p>
+
+    <h4>3. No database read replicas</h4>
+    <p>All reads and writes go to the same PostgreSQL instance. As read traffic grows (event browsing, user profiles), this becomes a bottleneck. Fix: PostgreSQL streaming replication — writes go to primary, reads go to replicas. Prisma supports read replicas via the <code>@prisma/extension-read-replicas</code> extension.</p>
+
+    <h4>4. N+1 query risk</h4>
+    <p>Prisma's <code>include</code> prevents N+1 queries in most cases, but complex nested includes can generate multiple queries. For the event list (12 events × sections × venue), this is currently 1 well-structured query. At scale, this would benefit from query analysis and potentially denormalization of frequently-read fields.</p>
+
+    <h4>5. No CDN for static assets</h4>
+    <p>Event banner images are served via Cloudinary URLs (good — Cloudinary has CDN built in), but the frontend static assets (JS, CSS) are served directly from the Node.js server in development. In production, the frontend should be deployed to a CDN (Vercel, Cloudflare Pages, AWS CloudFront).</p>
+  </div>
+
+  <div class="q-block"><p class="q">How would you scale this to 1 million users?</p></div>
+  <div class="a-block">
+    <p>This is a common system design question. Here's the honest answer for EventMeet specifically:</p>
+    <ol>
+      <li><strong>Database:</strong> PostgreSQL → AWS RDS with read replicas + connection pooling via PgBouncer. For the social graph (connections, availability), consider migrating to a graph database (Neo4j) where traversal queries are O(1) instead of O(n joins).</li>
+      <li><strong>Cache:</strong> Redis Cluster (horizontal sharding). CDN layer (CloudFront) for event data — cache at the edge, 100ms response globally.</li>
+      <li><strong>API:</strong> Multiple Node.js instances behind an Application Load Balancer. Socket.io still works via Redis adapter.</li>
+      <li><strong>Queues:</strong> BullMQ workers on separate machines — scale ticket generation independently from the API.</li>
+      <li><strong>Search:</strong> PostgreSQL ILIKE is too slow at scale. Migrate event search to Elasticsearch or Typesense — full-text search with filters in &lt;10ms.</li>
+      <li><strong>Payments:</strong> Add idempotency keys to all payment operations — prevent duplicate charges on retry.</li>
+      <li><strong>Notifications:</strong> At scale, switch from Socket.io push to a service like Firebase Cloud Messaging (FCM) for mobile push notifications.</li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 12. BUGS -->
+  <h2 id="mistakes">12. Bugs Encountered & What We Learned</h2>
+
+  <div class="section-intro">
+    This section is gold in interviews. Most candidates only talk about what worked. Talking about bugs you found and fixed shows debugging ability, self-awareness, and real project experience.
+  </div>
+
+  <div class="q-block"><p class="q">What bugs did you encounter during development?</p></div>
+  <div class="a-block">
+    <h4>Bug 1: Prisma Schema Validation Error (Phase 1)</h4>
+    <p><strong>What happened:</strong> The initial schema had circular relation references that Prisma couldn't resolve — the <code>User</code> model referenced <code>ConnectionRequest</code> as both sender and receiver, and Prisma needed explicit <code>@relation</code> names to disambiguate.</p>
+    <p><strong>Fix:</strong> Added named relations: <code>@relation("connectionSender")</code> and <code>@relation("connectionReceiver")</code>. The lesson: when a model has multiple relations to the same model, Prisma requires explicit names on all of them.</p>
+
+    <h4>Bug 2: ParticipantStatus Enum Mismatch (Phase 7)</h4>
+    <p><strong>What happened:</strong> When creating a booking with participants, we used status value <code>'CONFIRMED'</code> for the initiator — but the <code>ParticipantStatus</code> enum in Prisma didn't have <code>CONFIRMED</code>. It had <code>ACCEPTED</code>. Runtime error on first booking attempt.</p>
+    <p><strong>Fix:</strong> Changed to <code>'ACCEPTED'</code> for the initiator, <code>'INVITED'</code> for participants.</p>
+    <p><strong>Lesson:</strong> Always cross-reference enum values between the Prisma schema and application code. TypeScript would have caught this if we had used the Prisma-generated enum type instead of a string literal.</p>
+
+    <h4>Bug 3: Events Response Shape Mismatch (Phase 13 — Frontend)</h4>
+    <p><strong>What happened:</strong> The frontend expected <code>res.data.data.events</code> (nested events array) but the backend's <code>sendPaginated()</code> function returns the array directly as <code>res.data.data</code>. The page was blank with <code>Cannot read properties of undefined (reading 'filter')</code>.</p>
+    <p><strong>Fix:</strong> Changed frontend query to: <code>return { data: res.data.data, pagination: res.data.pagination }</code></p>
+    <p><strong>Lesson:</strong> Always verify API response shapes at integration time. In a shared type system (Zod + TypeScript from backend to frontend), this class of error is entirely preventable.</p>
+
+    <h4>Bug 4: user.fullName null crash (Phase 13 — Frontend)</h4>
+    <p><strong>What happened:</strong> The <code>available-users</code> endpoint returned users where <code>fullName</code> could be null (profile not yet filled). The frontend did <code>user.fullName.charAt(0)</code> — crash.</p>
+    <p><strong>Fix:</strong> Changed to <code>user.fullName?.charAt(0)?.toUpperCase() ?? '?'</code> — optional chaining with a fallback.</p>
+    <p><strong>Lesson:</strong> Always use optional chaining when accessing properties from external data sources. Data from APIs can always have unexpected null/undefined values regardless of what your TypeScript types say.</p>
+
+    <h4>Bug 5: Docker Desktop WSL Timeout (Environment)</h4>
+    <p><strong>What happened:</strong> Docker Desktop on Windows failed to start with "WSL distro installation timeout". The WSL process itself was hanging.</p>
+    <p><strong>Fix:</strong> <code>wsl --shutdown</code> + <code>wsl --update</code> + restart Docker Desktop as Administrator.</p>
+    <p><strong>Lesson:</strong> Docker on Windows has more friction than on Linux/Mac due to the WSL2 layer. Understanding the WSL2 architecture (a full Linux VM running inside Windows Hyper-V) explains why these issues occur and how to diagnose them.</p>
+
+    <h4>Bug 6: isAdmin Not Returned from Login — Admin Dashboard Invisible</h4>
+    <p><strong>What happened:</strong> After building the Admin Dashboard and setting <code>is_admin = true</code> in the DB, the Admin link never appeared in the sidebar — even after re-login. Three-layer omission: <code>isAdmin</code> not in Prisma select → not in <code>AuthUser</code> type → Zustand store held <code>isAdmin: undefined</code> → sidebar condition always false.</p>
+    <p><strong>Fix:</strong> Added <code>isAdmin: true</code> to the login service Prisma select and <code>isAdmin: boolean</code> to the <code>AuthUser</code> interface. Required sign-out + sign-in to pick up the change (Zustand store is populated at login time).</p>
+    <p><strong>Lesson:</strong> Auth fields not in the Prisma select are silently <code>undefined</code>. Always trace the full chain when a field is missing: DB → select → type → store → component.</p>
+
+    <h4>Bug 7: URL-Driven Tab State — Notifications Deep-Link Broke</h4>
+    <p><strong>What happened:</strong> Clicking a connection request notification navigated to <code>/connections?tab=requests</code> but the user always landed on the "Connections" tab, not "Requests". The tab was stored in <code>useState</code> which ignores the URL entirely.</p>
+    <p><strong>Fix:</strong> Replaced <code>useState</code> with <code>useSearchParams</code> on both Connections and Admin pages. Tab is now read directly from the URL: <code>searchParams.get('tab') || 'connections'</code>.</p>
+    <p><strong>Lesson:</strong> Any state that can be set by something outside the component (navigation, deep-links, external triggers) must live in the URL, not in component state.</p>
+
+    <h4>Bug 8: sendPaginated extra Field — Notifications Blank Despite DB Data</h4>
+    <p><strong>What happened:</strong> Notifications page showed blank even with 2 records in DB. Frontend read <code>res.data.notifications</code> (doesn't exist) and <code>res.data.unreadCount</code> (also doesn't exist). The <code>sendPaginated</code> response always puts data at <code>res.data.data</code> and optional fields at <code>res.data.pagination.extra</code>.</p>
+    <p><strong>Fix:</strong> Changed to <code>res.data.data</code> for the array and <code>res.data.pagination?.extra?.unreadCount</code> for the count.</p>
+    <p><strong>Lesson:</strong> <code>sendPaginated</code> with extra data buries it inside <code>pagination.extra</code>, not at the response root. This is the fifth time this shape was misread across the project — a shared type or documented contract prevents it.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ 13. SYSTEM DESIGN -->
+  <h2 id="system-design">13. System Design — If Asked to Design This From Scratch</h2>
+
+  <div class="q-block"><p class="q">Design a seat booking system that handles 10,000 concurrent users trying to book the last 5 seats.</p></div>
+  <div class="a-block">
+    <p>This is a direct application of what we built. Here's the answer structured for a system design interview:</p>
+    <h4>Step 1: Identify the core problem</h4>
+    <p>Seat booking is a race condition problem. The constraint: available seats can never go below zero. The challenge: 10,000 concurrent reads see "5 seats available" and all try to write.</p>
+    <h4>Step 2: Options and trade-offs</h4>
+    <table>
+      <tr><th>Approach</th><th>How it works</th><th>Pros</th><th>Cons</th></tr>
+      <tr><td>Optimistic Locking</td><td>Read seats + version number. Update only if version matches. Retry on mismatch.</td><td>High throughput — no blocking</td><td>Many retries under heavy contention — high DB load</td></tr>
+      <tr><td>Pessimistic Locking (SELECT FOR UPDATE)</td><td>Lock the row in the DB on read</td><td>Guaranteed no oversell</td><td>Locks held across entire transaction — slow under load</td></tr>
+      <tr><td>Redis Distributed Lock (our approach)</td><td>Redis SET NX EX before DB write</td><td>Fast, atomic, auto-expiry</td><td>Single lock = serialization bottleneck at extreme scale</td></tr>
+      <tr><td>Queue-based allocation</td><td>All booking requests join a Redis queue. Worker processes one at a time.</td><td>Perfect fairness, no contention</td><td>Higher latency — users wait in queue</td></tr>
+    </table>
+    <h4>Step 3: For 10,000 concurrent users — Queue-based</h4>
+    <p>At extreme scale, switch from distributed lock to a queue: <code>RPUSH booking-queue:sectionId {userId, timestamp}</code>. A worker pops requests with <code>BLPOP</code> and processes them sequentially. Users see "position X in queue". This is literally how Ticketmaster works for high-demand events.</p>
+  </div>
+
+  <div class="q-block"><p class="q">Design the notification system for this application.</p></div>
+  <div class="a-block">
+    <p>Our notification system has two channels:</p>
+    <ol>
+      <li><strong>Real-time (Socket.io):</strong> When the server creates a notification record in PostgreSQL, it immediately emits a <code>notification:new</code> event via Socket.io to the user's room. If the user is online, they see it instantly.</li>
+      <li><strong>Persistent (database):</strong> Notifications are stored in the <code>notifications</code> table. When a user opens the app after being offline, they fetch missed notifications via <code>GET /notifications</code>.</li>
+    </ol>
+    <p>This is the correct hybrid approach: real-time when the user is online, pull-based catch-up when they return. The 13 notification types cover every significant event in the user journey (connection requests, booking updates, group invites, rating reminders).</p>
+    <div class="tradeoff">
+      <div class="label">What we'd add for production</div>
+      <p>Mobile push notifications (FCM/APNs) for when the app is closed. Email digests for users inactive for 24+ hours. Notification preferences (let users disable certain types). Currently the architecture is ready for these — the notification creation is centralized in <code>notifications.service.ts</code>, so adding a push notification call is a 5-line change.</p>
+    </div>
+  </div>
+
+  <div class="q-block"><p class="q">Why did you choose this particular set of technologies rather than a simpler stack?</p></div>
+  <div class="a-block">
+    <p>This is a great question to answer honestly. Every technology in this stack was chosen for a specific reason tied to a specific requirement:</p>
+    <ul>
+      <li><strong>PostgreSQL:</strong> Because we have relational data with strict integrity requirements (bookings, payments, seats). MongoDB would have worked for social features but failed on financial data.</li>
+      <li><strong>Redis:</strong> Because we needed caching (performance), distributed locks (seat booking correctness), pub/sub (Socket.io at scale), and job queues (BullMQ). All Redis use cases emerged from real requirements.</li>
+      <li><strong>Socket.io:</strong> Because real-time messaging is a core feature, not an afterthought. Building it into the architecture from day one is far easier than retrofitting.</li>
+      <li><strong>BullMQ:</strong> Because email delivery, ticket generation, and refund processing should not block API responses and need retry capabilities.</li>
+      <li><strong>Zod:</strong> Because validation should be the same on both sides of the API — the same schema can be used in the Express middleware AND in React Hook Form, preventing API contract drift.</li>
+    </ul>
+    <p>The key insight: we didn't choose technologies because they're trendy. We identified the requirements first (real-time, concurrency control, async jobs, type safety) and then chose the tools that best solved those specific requirements.</p>
+  </div>
+
+  <br><br>
+  <div style="background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 24px; margin-top: 40px;">
+    <p style="font-weight: 700; color: #5b21b6; margin-bottom: 10px;">Final Interview Tip</p>
+    <p style="color: #4c1d95; margin: 0;">The best thing you can do in any technical interview is structure your answers around: <strong>what problem I faced → what options I considered → what I chose and why → what trade-offs I accepted</strong>. This project gives you genuine, specific examples for every common system design and architecture question. Don't memorize answers — understand the reasoning behind every decision, and the answers will come naturally.</p>
+  </div>
+
+  <br><br>
+  <p style="text-align:center; color:#aaa; font-size:12px;">EventMeet — Interview Preparation Guide &nbsp;|&nbsp; March 2026 &nbsp;|&nbsp; Built with Node.js · TypeScript · PostgreSQL · Redis · Socket.io · React · TanStack Query</p>
+  <br>
+
+</div>
+</body>
+</html>

@@ -28,7 +28,7 @@ export interface EventCreator {
 
 export interface AvailableUser {
   id:        string
-  fullName:  string
+  fullName:  string | null
   avatarUrl: string | null
   note:      string | null
 }

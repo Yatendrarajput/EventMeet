@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EventMeet — Master Doc vs Built + Suggestions</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.7; color: #1a1a2e; background: #fff; }
+
+    .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); color: white; text-align: center; padding: 60px 40px; }
+    .cover .badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 6px 20px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px; color: #a78bfa; }
+    .cover h1 { font-size: 52px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; background: linear-gradient(90deg, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .cover .subtitle { font-size: 17px; opacity: 0.8; margin-bottom: 20px; max-width: 680px; }
+    .cover .updated { margin-top: 50px; font-size: 12px; opacity: 0.4; }
+    .cover .meta { display: flex; gap: 50px; margin-top: 40px; flex-wrap: wrap; justify-content: center; }
+    .cover .meta-item { text-align: center; }
+    .cover .meta-item .val { font-size: 36px; font-weight: 700; color: #a78bfa; }
+    .cover .meta-item .lbl { font-size: 11px; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+
+    .page { max-width: 980px; margin: 0 auto; padding: 60px 40px; }
+    h2 { font-size: 26px; font-weight: 700; color: #302b63; border-bottom: 3px solid #7c3aed; padding-bottom: 10px; margin: 60px 0 24px; }
+    h3 { font-size: 16px; font-weight: 700; color: #1a1a2e; margin: 28px 0 10px; border-left: 4px solid #7c3aed; padding-left: 12px; }
+    h4 { font-size: 12px; font-weight: 700; color: #7c3aed; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: 1px; }
+    p { margin-bottom: 12px; color: #444; }
+
+    .toc { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 24px 28px; margin: 30px 0; }
+    .toc h3 { border: none; padding: 0; margin-top: 0; margin-bottom: 14px; color: #302b63; }
+    .toc ol { padding-left: 20px; }
+    .toc li { padding: 4px 0; color: #444; font-size: 13px; }
+    .toc a { color: #5b21b6; text-decoration: none; }
+    .toc a:hover { color: #7c3aed; text-decoration: underline; }
+
+    /* Status badges */
+    .match   { display: inline-block; background: #d1fae5; color: #065f46; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; }
+    .changed { display: inline-block; background: #fef3c7; color: #92400e; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; }
+    .missing { display: inline-block; background: #fee2e2; color: #991b1b; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; }
+    .added   { display: inline-block; background: #dbeafe; color: #1e40af; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; }
+    .partial { display: inline-block; background: #fce7f3; color: #9d174d; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; }
+
+    /* Comparison table */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+    th { background: #302b63; color: white; padding: 10px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 10px 14px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    tr:hover td { background: #f9f7ff; }
+    td code { background: #f0ebff; color: #5b21b6; padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: 'Courier New', monospace; }
+
+    /* Info boxes */
+    .info    { background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; font-size: 13px; color: #1e40af; }
+    .warn    { background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; font-size: 13px; color: #92400e; }
+    .success { background: #f0fdf4; border-left: 4px solid #22c55e; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; font-size: 13px; color: #15803d; }
+    .danger  { background: #fff1f2; border-left: 4px solid #ef4444; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; font-size: 13px; color: #9f1239; }
+
+    /* Comparison row cards */
+    .comp-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; position: relative; overflow: hidden; }
+    .comp-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+    .comp-card.green::before  { background: #22c55e; }
+    .comp-card.yellow::before { background: #f59e0b; }
+    .comp-card.red::before    { background: #ef4444; }
+    .comp-card.blue::before   { background: #3b82f6; }
+    .comp-card .comp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+    .comp-card .comp-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+    .comp-card .comp-body { font-size: 13px; color: #555; }
+    .comp-card .comp-body p { margin-bottom: 6px; }
+
+    .planned { background: #f5f3ff; border-radius: 6px; padding: 8px 12px; margin: 8px 0; font-size: 12px; color: #4c1d95; font-family: 'Courier New', monospace; }
+    .built   { background: #f0fdf4; border-radius: 6px; padding: 8px 12px; margin: 8px 0; font-size: 12px; color: #14532d; font-family: 'Courier New', monospace; }
+    .not-built { background: #fff1f2; border-radius: 6px; padding: 8px 12px; margin: 8px 0; font-size: 12px; color: #7f1d1d; font-family: 'Courier New', monospace; }
+
+    /* Suggestion cards */
+    .suggestion-card { background: #0f0c29; border: 1px solid #302b63; border-radius: 14px; padding: 24px 28px; margin-bottom: 20px; }
+    .suggestion-card .s-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+    .suggestion-card .s-num { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #7c3aed, #e94560); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: white; flex-shrink: 0; }
+    .suggestion-card .s-title { font-size: 16px; font-weight: 700; color: #f1f0ff; }
+    .suggestion-card .s-phase { font-size: 11px; color: #8b8a9b; margin-top: 3px; }
+    .suggestion-card .s-body { font-size: 13px; color: #c9c8d8; line-height: 1.8; }
+    .suggestion-card .s-body p { margin-bottom: 10px; color: #c9c8d8; }
+    .suggestion-card .s-body ul { padding-left: 20px; margin-bottom: 10px; }
+    .suggestion-card .s-body li { padding: 3px 0; color: #c9c8d8; }
+    .s-priority { display: inline-block; border-radius: 20px; padding: 2px 10px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-left: 8px; }
+    .p-critical { background: #ef444420; color: #ef4444; }
+    .p-high     { background: #f59e0b20; color: #fbbf24; }
+    .p-medium   { background: #3b82f620; color: #60a5fa; }
+    .p-low      { background: #22c55e20; color: #34d399; }
+
+    .code-block { background: #1a1a2e; color: #e2e8f0; border-radius: 10px; padding: 16px 20px; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.8; margin: 12px 0; overflow-x: auto; }
+    .code-block .c { color: #6b7280; }
+    .code-block .g { color: #34d399; }
+    .code-block .r { color: #f87171; }
+    .code-block .y { color: #fbbf24; }
+    .code-block .v { color: #a78bfa; }
+
+    ul { padding-left: 20px; margin-bottom: 12px; }
+    ul li { padding: 3px 0; color: #444; }
+
+    .divider { border: none; border-top: 1px solid #e5e7eb; margin: 40px 0; }
+    .section-intro { background: #faf5ff; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; border: 1px solid #e9d5ff; font-size: 13px; color: #5b21b6; }
+
+    .stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 24px 0; }
+    .stat-box { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px 20px; text-align: center; flex: 1; min-width: 120px; }
+    .stat-box .s-val { font-size: 28px; font-weight: 800; color: #7c3aed; }
+    .stat-box .s-lbl { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+    @media print { .cover { page-break-after: always; } .comp-card, .suggestion-card { page-break-inside: avoid; } }
+  </style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="badge">EventMeet — Master Doc v1.2 Analysis</div>
+  <h1>Plan vs Reality</h1>
+  <p class="subtitle">A complete comparison of EventMeet_MasterDoc_v1.2 against what was actually built — every module, every endpoint, every infrastructure decision. Followed by a prioritised suggestion list for Phase 2.</p>
+  <div class="meta">
+    <div class="meta-item"><div class="val">13</div><div class="lbl">Modules Built</div></div>
+    <div class="meta-item"><div class="val">60+</div><div class="lbl">Endpoints Live</div></div>
+    <div class="meta-item"><div class="val">9</div><div class="lbl">Deviations</div></div>
+    <div class="meta-item"><div class="val">14</div><div class="lbl">Suggestions</div></div>
+  </div>
+  <div class="updated">March 2026 &nbsp;|&nbsp; Based on EventMeet_MasterDoc_v1.2 &amp; EventMeet_HLD_v1.1</div>
+</div>
+
+<div class="page">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h3>Table of Contents</h3>
+    <ol>
+      <li><a href="#summary">High-Level Summary</a></li>
+      <li><a href="#functional">Functional Requirements — Planned vs Built</a></li>
+      <li><a href="#endpoints">API Endpoints — Planned vs Built</a></li>
+      <li><a href="#schema">Database Schema — Planned vs Built</a></li>
+      <li><a href="#infrastructure">Infrastructure — Planned vs Built</a></li>
+      <li><a href="#decisions">Key Decisions Log — Followed or Changed</a></li>
+      <li><a href="#suggestions">Suggestions &amp; Improvements (Phase 2)</a></li>
+    </ol>
+  </div>
+
+  <!-- ═══ 1. SUMMARY ═══ -->
+  <h2 id="summary">1. High-Level Summary</h2>
+
+  <div class="section-intro">
+    The master document defined 55 endpoints across 13 modules, a 21-table PostgreSQL schema, a credits-based payment model, and full AWS infrastructure. Here is where we stand against that plan.
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-box"><div class="s-val">55</div><div class="s-lbl">Planned Endpoints</div></div>
+    <div class="stat-box"><div class="s-val">60+</div><div class="s-lbl">Built Endpoints</div></div>
+    <div class="stat-box"><div class="s-val">21</div><div class="s-lbl">Planned DB Tables</div></div>
+    <div class="stat-box"><div class="s-val">21</div><div class="s-lbl">Built DB Tables</div></div>
+    <div class="stat-box"><div class="s-val">14</div><div class="s-lbl">FR Items Planned</div></div>
+    <div class="stat-box"><div class="s-val">10/14</div><div class="s-lbl">FR Items Live</div></div>
+  </div>
+
+  <table>
+    <tr><th>Area</th><th>Master Plan</th><th>Reality</th><th>Status</th></tr>
+    <tr><td><strong>Core Auth</strong></td><td>8 endpoints, email verification, JWT rotation, bcrypt 12</td><td>All 8 built and working</td><td><span class="match">MATCH</span></td></tr>
+    <tr><td><strong>Event Discovery</strong></td><td>Browse + detail + available users, Redis cache 5min</td><td>All built, Redis cache working, view_count implemented</td><td><span class="match">MATCH</span></td></tr>
+    <tr><td><strong>Availability</strong></td><td>Flag + remove, email verified required, BullMQ expiry</td><td>Flag + remove built. BullMQ expiry job built. Verification guard in place.</td><td><span class="match">MATCH</span></td></tr>
+    <tr><td><strong>Connections</strong></td><td>3 endpoints, event-scoped, Quick Connect flag</td><td>Built but API structure changed — separate /connections routes added for frontend needs</td><td><span class="changed">CHANGED</span></td></tr>
+    <tr><td><strong>Real-time Chat</strong></td><td>Socket.io, DIRECT + GROUP, 2000 char limit, all message types</td><td>DIRECT + GROUP built. Socket.io working. 2000 char limit enforced. BOOKING_INVITE/QUEUE_UPDATE types not wired to booking flow yet.</td><td><span class="partial">PARTIAL</span></td></tr>
+    <tr><td><strong>Credits + Razorpay</strong></td><td>Credits-only payment. Razorpay for recharge only. RBI compliant.</td><td>Credit tables and endpoints built. Razorpay webhook endpoint built. End-to-end payment flow NOT completed — booking uses finalAmount in rupees directly.</td><td><span class="missing">INCOMPLETE</span></td></tr>
+    <tr><td><strong>Bookings</strong></td><td>Full 7-stage state machine: INITIATED → QUEUE_PENDING → SEATS_PENDING → PAYMENT_PENDING → CONFIRMED</td><td>Simplified to PAYMENT_PENDING → CONFIRMED/CANCELLED. Queue stages (INITIATED, QUEUE_PENDING, SEATS_PENDING) not implemented in practice.</td><td><span class="changed">SIMPLIFIED</span></td></tr>
+    <tr><td><strong>Tickets</strong></td><td>QR code, PDF via BullMQ, S3 storage, CloudFront pre-signed URL, SES email</td><td>Tables built, endpoints built. AWS services (S3, SES, CloudFront) not configured. PDF generation not live.</td><td><span class="partial">PARTIAL</span></td></tr>
+    <tr><td><strong>Ratings</strong></td><td>Submit + pending list, confirmed booking required, 24hr prompt</td><td>Both endpoints built. average_rating denormalised update implemented.</td><td><span class="match">MATCH</span></td></tr>
+    <tr><td><strong>Notifications</strong></td><td>13 types, DB first then Socket.io, 3 endpoints</td><td>All 13 types implemented. Socket.io emit working. Added DELETE and unread-count endpoints beyond master spec.</td><td><span class="added">MATCH + EXTRAS</span></td></tr>
+    <tr><td><strong>Admin</strong></td><td>5 endpoints: create event, update event, create venue, discount rules, booking monitor</td><td>Built different admin: stats, user management (ban/unban/promote), bookings list. Original event/venue/discount admin endpoints not built.</td><td><span class="changed">CHANGED</span></td></tr>
+    <tr><td><strong>Observability</strong></td><td>Pino + CloudWatch + Sentry — log every booking state, payment, webhook, Redis lock</td><td>Not implemented. Basic console/Express logging only.</td><td><span class="missing">NOT BUILT</span></td></tr>
+    <tr><td><strong>Infrastructure</strong></td><td>AWS EC2 + RDS + S3 + CloudFront + SES + Vercel + GitHub Actions CI/CD</td><td>Local Docker only. No AWS services configured. No CI/CD pipeline.</td><td><span class="missing">NOT BUILT</span></td></tr>
+    <tr><td><strong>Branch Strategy</strong></td><td>main / staging / dev / feature/*</td><td>main / feature/frontend only. No staging or dev branch.</td><td><span class="changed">CHANGED</span></td></tr>
+    <tr><td><strong>Frontend</strong></td><td>Not detailed in master (implied SPA)</td><td>11 full pages built: Landing, Auth, Events, EventDetail, Connections, Conversations, Bookings, BookingNew, Notifications, Profile, Admin</td><td><span class="added">ADDED</span></td></tr>
+  </table>
+
+  <!-- ═══ 2. FUNCTIONAL REQUIREMENTS ═══ -->
+  <h2 id="functional">2. Functional Requirements — Planned vs Built</h2>
+
+  <div class="comp-card green">
+    <div class="comp-header">
+      <div class="comp-title">FR1 — Authentication + Email Verification</div>
+      <span class="match">FULLY MET</span>
+    </div>
+    <div class="comp-body">
+      <p>Master: Register → email_verified_at NULL → verify email → can browse. Cannot flag availability or book until verified. JWT 15min, refresh 30 days, bcrypt rounds 12.</p>
+      <div class="built">✓ All 8 auth endpoints built. Email verification guard on availability + connections + bookings. JWT 15min access, 30-day refresh rotation. bcrypt rounds 12. Redis blacklist on logout.</div>
+    </div>
+  </div>
+
+  <div class="comp-card green">
+    <div class="comp-header">
+      <div class="comp-title">FR2 — Event Discovery</div>
+      <span class="match">FULLY MET</span>
+    </div>
+    <div class="comp-body">
+      <p>Master: city/category/date filters. Redis cache 5min TTL. Published events only. view_count incremented on detail fetch.</p>
+      <div class="built">✓ Browse with category + city + date filters. Redis cache 5min working. Published-only filter in place. view_count incremented on GET /events/:id. tags[] filtering also added (v1.2 requirement).</div>
+    </div>
+  </div>
+
+  <div class="comp-card green">
+    <div class="comp-header">
+      <div class="comp-title">FR3 — Availability</div>
+      <span class="match">FULLY MET</span>
+    </div>
+    <div class="comp-body">
+      <p>Master: Flag/remove per event, note optional, expires at event start_datetime, BullMQ hourly expiry job, blocked users filtered, requires email verified.</p>
+      <div class="built">✓ Flag + remove endpoints. Note field. BullMQ expiry job built. Block filter on available-users. Email verification required guard. Added GET /events/:id/my-availability (not in master — useful for frontend "am I going?" state).</div>
+    </div>
+  </div>
+
+  <div class="comp-card yellow">
+    <div class="comp-header">
+      <div class="comp-title">FR4 — Connections</div>
+      <span class="changed">CHANGED — API RESTRUCTURED</span>
+    </div>
+    <div class="comp-body">
+      <p>Master defined 3 event-scoped endpoints: POST /events/:id/connections, GET /events/:id/connections, PATCH /connections/:id.</p>
+      <div class="planned">Master: POST /events/:eventId/connections (send), GET /events/:eventId/connections (list), PATCH /connections/:id (respond)</div>
+      <div class="built">Built: POST /connections/events/:eventId/users/:userId (send), GET /connections (my accepted), GET /connections/requests (received), GET /connections/sent (sent), PATCH /connections/:id (respond)</div>
+      <p>Why changed: The frontend needed separate paginated endpoints for each tab (connections/requests/sent) which the master's single list endpoint didn't provide cleanly. The added endpoints serve the Connections page tabs. This is an additive change — the core send/respond flow is preserved.</p>
+    </div>
+  </div>
+
+  <div class="comp-card yellow">
+    <div class="comp-header">
+      <div class="comp-title">FR5 — Real-time Chat</div>
+      <span class="partial">PARTIAL — BOOKING_INVITE TYPE NOT WIRED</span>
+    </div>
+    <div class="comp-body">
+      <p>Master: Socket.io, DIRECT + GROUP types, event-scoped, PENDING for Quick Connect, message types: TEXT / SYSTEM / BOOKING_INVITE / QUEUE_UPDATE. Max 2000 chars.</p>
+      <div class="built">✓ Socket.io working. DIRECT + GROUP conversations. TEXT + SYSTEM messages working. 2000 char limit enforced at DB and middleware. Real-time delivery working.</div>
+      <div class="not-built">✗ BOOKING_INVITE message type: planned as an interactive card in chat that triggers booking invite flow. Not connected because the full group booking flow (QUEUE_PENDING stage) was simplified. QUEUE_UPDATE messages also not live for same reason.</div>
+    </div>
+  </div>
+
+  <div class="comp-card red">
+    <div class="comp-header">
+      <div class="comp-title">FR6 — Credits + Razorpay</div>
+      <span class="missing">INCOMPLETE — CORE PAYMENT NOT LIVE</span>
+    </div>
+    <div class="comp-body">
+      <p>Master: Recharge via Razorpay only. Internal credits. Non-withdrawable. 1-year expiry. Idempotent via razorpay_payment_id UNIQUE constraint. Credits deducted at booking.</p>
+      <div class="built">✓ credit_balances, credit_transactions tables built. GET /credits/balance, POST /credits/recharge/initiate, POST /credits/recharge/webhook endpoints built. HMAC signature verification on webhook built. Idempotency key logic built.</div>
+      <div class="not-built">✗ Razorpay account not set up — no live API keys. Webhook not receiving real events. Booking payment currently creates PAYMENT_PENDING with rupee finalAmount but does NOT deduct from credit_balances. The 9-step atomic transaction from master (SELECT FOR UPDATE on credit_balances + event_sections) is built but not triggered from the frontend booking flow.</div>
+      <p><strong>This is the biggest gap between master plan and reality.</strong> The payment model is a credits system internally, but it's not connected end-to-end. Everything is built — it just needs the Razorpay account and a booking flow update.</p>
+    </div>
+  </div>
+
+  <div class="comp-card yellow">
+    <div class="comp-header">
+      <div class="comp-title">FR7 — Group Booking + FR13 — Solo Booking</div>
+      <span class="changed">SIMPLIFIED STATE MACHINE</span>
+    </div>
+    <div class="comp-body">
+      <p>Master defined a 7-stage state machine: INITIATED → QUEUE_PENDING → SEATS_PENDING → PAYMENT_PENDING → CONFIRMED → CANCELLED → REFUNDED.</p>
+      <div class="planned">Master stages: Initiate → Invite Response (24hr) → All Accepted → Queue Order → Confirm Queue → Section + Seats → Payment Check → Confirm / Remove / Cancel</div>
+      <div class="built">Built stages: Create booking (PAYMENT_PENDING) → Select section → Confirm payment → CONFIRMED / CANCELLED. The INITIATED, QUEUE_PENDING, SEATS_PENDING stages and the queue management endpoints exist in the backend but the frontend booking flow skips directly to PAYMENT_PENDING. The invite → accept → queue → seats pipeline is designed but not surfaced to users.</div>
+      <p>Why simplified: The full 7-stage flow requires a group-coordinated UI (all participants must respond before proceeding). For Phase 1 with no real users, the simplified solo + small group flow was prioritised to get something testable. The backend tables support the full flow — only the frontend flow is simplified.</p>
+    </div>
+  </div>
+
+  <div class="comp-card yellow">
+    <div class="comp-header">
+      <div class="comp-title">FR9 — Tickets</div>
+      <span class="partial">PARTIAL — AWS NOT CONFIGURED</span>
+    </div>
+    <div class="comp-body">
+      <p>Master: QR code (HMAC hash), PDF async via BullMQ, S3 storage, CloudFront pre-signed URL (1hr), email via SES. My Bookings page.</p>
+      <div class="built">✓ tickets table built. QR code HMAC generation logic built. BullMQ ticket generation job built. GET /tickets, /tickets/:id, /tickets/:id/download endpoints built. My Bookings page in frontend.</div>
+      <div class="not-built">✗ AWS S3 bucket not configured. No real PDF being generated. CloudFront distribution not set up. SES email not configured. The download endpoint returns a placeholder — it will return a real pre-signed URL once S3 is connected.</div>
+    </div>
+  </div>
+
+  <div class="comp-card green">
+    <div class="comp-header">
+      <div class="comp-title">FR10 — Refunds</div>
+      <span class="match">BUILT (pending payment activation)</span>
+    </div>
+    <div class="comp-body">
+      <p>Master: Event cancel → BullMQ async → credits 2-5 min. idempotency_key UNIQUE prevents double refunds.</p>
+      <div class="built">✓ refunds table built with UNIQUE(idempotency_key). BullMQ refund job built and queued on event cancellation. Refund logic: credits added back to credit_balances. Will work correctly once Razorpay + credits flow is live.</div>
+    </div>
+  </div>
+
+  <div class="comp-card green">
+    <div class="comp-header">
+      <div class="comp-title">FR11 — Ratings</div>
+      <span class="match">FULLY MET</span>
+    </div>
+    <div class="comp-body">
+      <p>Master: 1-5 stars, tags, optional review, confirmed booking required, prompt 24hrs after event end.</p>
+      <div class="built">✓ POST /ratings (submit with UNIQUE rater+booking guard). GET /ratings/pending. average_rating denormalised update on user. Tags array. Score 1-5 CHECK constraint. BullMQ 24hr prompt job built.</div>
+    </div>
+  </div>
+
+  <div class="comp-card green">
+    <div class="comp-header">
+      <div class="comp-title">FR12 — Notifications</div>
+      <span class="added">FULLY MET + EXTRAS</span>
+    </div>
+    <div class="comp-body">
+      <p>Master: 13 notification types, saved to DB first, then Socket.io emit, unread count tracked.</p>
+      <div class="built">✓ All 13 types implemented. DB-first then Socket.io pattern followed. Unread count tracked. Added: DELETE /notifications/:id and GET /notifications/unread-count (not in master — added for frontend badge and delete UX).</div>
+    </div>
+  </div>
+
+  <div class="comp-card red">
+    <div class="comp-header">
+      <div class="comp-title">FR14 — Observability</div>
+      <span class="missing">NOT BUILT</span>
+    </div>
+    <div class="comp-body">
+      <p>Master: Pino structured logging. CloudWatch log shipping. Sentry error tracking. Log every booking state change, payment attempt, webhook received, Redis lock, BullMQ job.</p>
+      <div class="not-built">✗ None of this is implemented. The app uses basic console logs. No structured JSON logging. No CloudWatch. No Sentry. This means in production, debugging any payment failure or booking issue will be very difficult — there's no audit trail.</div>
+    </div>
+  </div>
+
+  <!-- ═══ 3. API ENDPOINTS ═══ -->
+  <h2 id="endpoints">3. API Endpoints — Planned vs Built</h2>
+
+  <table>
+    <tr><th>Module</th><th>Planned Count</th><th>Built Count</th><th>Notes</th></tr>
+    <tr>
+      <td><strong>Auth</strong></td><td>8</td><td>8</td>
+      <td><span class="match">MATCH</span> — All 8 built: register, login, refresh, logout, forgot-password, reset-password, verify-email, resend-verification</td>
+    </tr>
+    <tr>
+      <td><strong>Users</strong></td><td>7</td><td>7</td>
+      <td><span class="match">MATCH</span> — me, update, avatar, view-user, ratings, block, unblock</td>
+    </tr>
+    <tr>
+      <td><strong>Events</strong></td><td>3</td><td>4</td>
+      <td><span class="added">+1 ADDED</span> — browse, detail, available-users (all built). Added: GET /events/:id/my-availability (not in master, needed for "I'm Going" toggle state)</td>
+    </tr>
+    <tr>
+      <td><strong>Availability</strong></td><td>2</td><td>2</td>
+      <td><span class="match">MATCH</span> — POST and DELETE /events/:id/availability</td>
+    </tr>
+    <tr>
+      <td><strong>Connections</strong></td><td>3</td><td>5</td>
+      <td><span class="added">RESTRUCTURED + EXPANDED</span> — Master had 3 event-scoped endpoints. Built 5: send (restructured URL), list accepted, list requests, list sent, respond. All core functionality preserved, shape changed for frontend needs.</td>
+    </tr>
+    <tr>
+      <td><strong>Conversations &amp; Chat</strong></td><td>8</td><td>8</td>
+      <td><span class="match">MATCH</span> — All 8 built: list, detail, messages, send-message, create-group, respond-invite, leave, change-role</td>
+    </tr>
+    <tr>
+      <td><strong>Credits</strong></td><td>4</td><td>4</td>
+      <td><span class="partial">BUILT, NOT LIVE</span> — All 4 endpoints exist. Razorpay not connected. balance, recharge initiate, webhook, transactions — all built, none tested end-to-end.</td>
+    </tr>
+    <tr>
+      <td><strong>Bookings</strong></td><td>9</td><td>9</td>
+      <td><span class="changed">BUILT, FLOW SIMPLIFIED</span> — All 9 endpoints exist. Queue management endpoints (/queue, /queue/confirm, /seats) built but not used in frontend flow. Booking goes directly to PAYMENT_PENDING.</td>
+    </tr>
+    <tr>
+      <td><strong>Tickets</strong></td><td>3</td><td>3</td>
+      <td><span class="partial">BUILT, AWS NOT CONNECTED</span> — list, detail, download all built. PDF + S3 + SES not configured.</td>
+    </tr>
+    <tr>
+      <td><strong>Ratings</strong></td><td>2</td><td>2</td>
+      <td><span class="match">MATCH</span> — submit and pending-list</td>
+    </tr>
+    <tr>
+      <td><strong>Notifications</strong></td><td>3</td><td>5</td>
+      <td><span class="added">+2 ADDED</span> — list, read-one, read-all (all built). Added: DELETE /notifications/:id and GET /notifications/unread-count for frontend bell badge and delete UX.</td>
+    </tr>
+    <tr>
+      <td><strong>Admin</strong></td><td>5</td><td>6</td>
+      <td><span class="changed">CHANGED SCOPE</span> — Master: create event, update event, create venue, discount rules, booking monitor. Built: GET /admin/stats, GET /admin/users, GET /admin/bookings, PATCH ban, PATCH unban, PATCH promote-admin. Original event/venue/discount creation endpoints not built — admin currently creates events via direct DB or will need a proper admin UI.</td>
+    </tr>
+    <tr style="background:#f5f3ff;">
+      <td><strong>TOTAL</strong></td><td><strong>55</strong></td><td><strong>60+</strong></td>
+      <td>More endpoints built than planned due to frontend-driven additions</td>
+    </tr>
+  </table>
+
+  <!-- ═══ 4. DATABASE SCHEMA ═══ -->
+  <h2 id="schema">4. Database Schema — Planned vs Built</h2>
+
+  <div class="success">Master planned 21 tables. All 21 tables were built and match the v1.2 schema definition. The schema is the strongest part of the implementation — the most faithful to the master document.</div>
+
+  <table>
+    <tr><th>Domain</th><th>Tables</th><th>Status</th><th>Notes</th></tr>
+    <tr>
+      <td><strong>Identity &amp; Trust</strong></td>
+      <td>users, blocks</td>
+      <td><span class="match">MATCH</span></td>
+      <td>All columns present including v1.2 additions (email_verified_at, is_admin, average_rating, total_ratings). Soft delete on users. Note: master says full_name NOT NULL, but built as NULLABLE — this caused frontend null crash (Bug #17).</td>
+    </tr>
+    <tr>
+      <td><strong>Events &amp; Venues</strong></td>
+      <td>venues, events, event_sections, event_availability</td>
+      <td><span class="match">MATCH</span></td>
+      <td>v1.2 schema changes applied: available_seats + total_seats removed from events, tags[] + view_count added. All partial indexes built. Seat constraint CHECK(available_seats >= 0) in place.</td>
+    </tr>
+    <tr>
+      <td><strong>Social &amp; Connections</strong></td>
+      <td>connection_requests, conversations, conversation_members, messages, group_invites</td>
+      <td><span class="match">MATCH</span></td>
+      <td>All 5 tables built. UNIQUE constraints in place. Messages content CHECK(char_length &lt;= 2000) added as per v1.2. idx_messages_conversation (the most critical index) created correctly.</td>
+    </tr>
+    <tr>
+      <td><strong>Credits &amp; Payments</strong></td>
+      <td>credit_balances, credit_transactions, discount_rules</td>
+      <td><span class="match">MATCH</span></td>
+      <td>All 3 tables built exactly to spec. UNIQUE(razorpay_payment_id), CHECK(balance >= 0), append-only ledger — all in place. Discount_rules table complete but discount calculation not integrated into booking flow.</td>
+    </tr>
+    <tr>
+      <td><strong>Bookings &amp; Tickets</strong></td>
+      <td>bookings, booking_participants, booking_invites, tickets, refunds</td>
+      <td><span class="match">MATCH</span></td>
+      <td>All 5 tables built. payment_idempotency_key UNIQUE added as per v1.2. Full status enum (INITIATED → QUEUE_PENDING → SEATS_PENDING → PAYMENT_PENDING → CONFIRMED → CANCELLED → REFUNDED) in schema. Queue position and seat assignment columns present. Refunds table with UNIQUE(idempotency_key).</td>
+    </tr>
+    <tr>
+      <td><strong>Ratings</strong></td>
+      <td>ratings</td>
+      <td><span class="match">MATCH</span></td>
+      <td>Built to spec. UNIQUE(rater_id, booking_id). CHECK(score BETWEEN 1 AND 5). Tags array.</td>
+    </tr>
+    <tr>
+      <td><strong>Notifications</strong></td>
+      <td>notifications</td>
+      <td><span class="match">MATCH</span></td>
+      <td>Built to spec. All 13 notification_type enum values. Both partial indexes (unread count + paginated list) created.</td>
+    </tr>
+  </table>
+
+  <div class="warn">One deviation: <strong>users.full_name</strong> — Master specifies <code>NOT NULL</code>. Built as nullable. This was the right practical call (users may not fill profile immediately) but it diverges from the schema spec and caused Bug #17 (null crash in frontend). The master should be updated to reflect <code>NULLABLE</code>.</div>
+
+  <!-- ═══ 5. INFRASTRUCTURE ═══ -->
+  <h2 id="infrastructure">5. Infrastructure — Planned vs Built</h2>
+
+  <div class="section-intro">
+    This is the largest gap between master plan and current state. The master specified a full AWS production setup with CI/CD from day one. Currently, everything runs locally in Docker.
+  </div>
+
+  <table>
+    <tr><th>Component</th><th>Master Plan</th><th>Current State</th><th>Status</th></tr>
+    <tr>
+      <td><strong>Backend Hosting</strong></td>
+      <td>AWS EC2 t2.micro, Node.js + Redis in Docker containers</td>
+      <td>Local only — Docker Compose on developer machine</td>
+      <td><span class="missing">NOT DEPLOYED</span></td>
+    </tr>
+    <tr>
+      <td><strong>Database</strong></td>
+      <td>AWS RDS db.t3.micro — Managed PostgreSQL, auto backups</td>
+      <td>Local PostgreSQL in Docker container</td>
+      <td><span class="missing">NOT DEPLOYED</span></td>
+    </tr>
+    <tr>
+      <td><strong>Redis</strong></td>
+      <td>Docker on EC2 (same instance)</td>
+      <td>Local Redis in Docker container</td>
+      <td><span class="missing">NOT DEPLOYED</span></td>
+    </tr>
+    <tr>
+      <td><strong>Frontend</strong></td>
+      <td>Vercel — free forever, auto-deploy on GitHub push</td>
+      <td>Local Vite dev server only</td>
+      <td><span class="missing">NOT DEPLOYED</span></td>
+    </tr>
+    <tr>
+      <td><strong>File Storage</strong></td>
+      <td>AWS S3 + CloudFront — pre-signed URLs, ticket PDFs</td>
+      <td>Not configured</td>
+      <td><span class="missing">NOT CONFIGURED</span></td>
+    </tr>
+    <tr>
+      <td><strong>Email</strong></td>
+      <td>AWS SES — booking confirmations, tickets, verification</td>
+      <td>Email service code built but no SES account. Verification emails not actually sent.</td>
+      <td><span class="missing">NOT CONFIGURED</span></td>
+    </tr>
+    <tr>
+      <td><strong>Image CDN</strong></td>
+      <td>Cloudinary — avatars, event banners, auto-resize + WebP</td>
+      <td>Cloudinary account set up and working for event banners</td>
+      <td><span class="match">WORKING</span></td>
+    </tr>
+    <tr>
+      <td><strong>Payments</strong></td>
+      <td>Razorpay — credit recharge only, HMAC webhook verification</td>
+      <td>Integration code built. No Razorpay account. No live keys.</td>
+      <td><span class="missing">NOT CONFIGURED</span></td>
+    </tr>
+    <tr>
+      <td><strong>CI/CD</strong></td>
+      <td>GitHub Actions: Install → TypeScript check → Jest tests → npm audit → Lint → Build Docker → Push ECR → Deploy EC2</td>
+      <td>No pipeline. Manual local development only.</td>
+      <td><span class="missing">NOT BUILT</span></td>
+    </tr>
+    <tr>
+      <td><strong>Container Registry</strong></td>
+      <td>AWS ECR — Docker image registry</td>
+      <td>Not configured</td>
+      <td><span class="missing">NOT CONFIGURED</span></td>
+    </tr>
+    <tr>
+      <td><strong>Branch Strategy</strong></td>
+      <td>main / staging / dev / feature/* / hotfix/*</td>
+      <td>main / feature/frontend only. feature/frontend pending merge.</td>
+      <td><span class="changed">PARTIAL</span></td>
+    </tr>
+    <tr>
+      <td><strong>Seed Data</strong></td>
+      <td>10 users, 3 venues, 8 events, 3 sections/event, connections, 5 conversations, credit balances</td>
+      <td>Manual DB entries via Prisma Studio. No formal seed script (npx prisma db seed).</td>
+      <td><span class="missing">NOT BUILT</span></td>
+    </tr>
+    <tr>
+      <td><strong>Test Suite</strong></td>
+      <td>Jest — TypeScript check + tests required to pass CI</td>
+      <td>No tests written</td>
+      <td><span class="missing">NOT BUILT</span></td>
+    </tr>
+    <tr>
+      <td><strong>Logging</strong></td>
+      <td>Pino structured JSON + CloudWatch shipping + Sentry</td>
+      <td>Basic console logging only</td>
+      <td><span class="missing">NOT BUILT</span></td>
+    </tr>
+    <tr>
+      <td><strong>Security Updates</strong></td>
+      <td>Dependabot + npm audit in CI — fails on HIGH/CRITICAL</td>
+      <td>Not configured</td>
+      <td><span class="missing">NOT CONFIGURED</span></td>
+    </tr>
+  </table>
+
+  <!-- ═══ 6. DECISIONS LOG ═══ -->
+  <h2 id="decisions">6. Key Decisions Log — Followed or Changed</h2>
+
+  <p>The master document locked 20+ architectural decisions in Section 11. Here's which were followed and which changed:</p>
+
+  <table>
+    <tr><th>Decision</th><th>Master Said</th><th>What Happened</th><th>Status</th></tr>
+    <tr><td>Language</td><td>TypeScript — frontend + backend, non-negotiable</td><td>TypeScript throughout ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>ORM</td><td>Prisma — best TS integration, auto-generated types</td><td>Prisma used throughout ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>Job Queue</td><td>BullMQ — NOT Bull. TS-native rewrite.</td><td>BullMQ used ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>State Management</td><td>Zustand — 3× less code than Redux</td><td>Zustand for auth store ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>Seat Model</td><td>Sections (Floor/Balcony/VIP) — professional in 3-4 days</td><td>Sections implemented exactly ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>Seat count source</td><td>SUM(event_sections) — single source of truth</td><td>available_seats removed from events table ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>Payment idempotency</td><td>UNIQUE(payment_idempotency_key) on bookings</td><td>Column added ✓ — not yet exercised since credits flow not live</td><td><span class="partial">BUILT, NOT TESTED</span></td></tr>
+    <tr><td>Notification delivery</td><td>DB first then Socket.io — offline users preserved</td><td>Followed exactly ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>Production hosting</td><td>AWS EC2 + RDS + Docker</td><td>Not deployed yet — local Docker only</td><td><span class="missing">PENDING</span></td></tr>
+    <tr><td>Payment at booking</td><td>Credits only — RBI compliant</td><td>Credit tables built but booking currently just stores rupee amount without deducting credits</td><td><span class="changed">DEVIATED</span></td></tr>
+    <tr><td>Consistency model</td><td>Strong for money+seats, eventual for rest</td><td>Logic built in booking service. Not exercised end-to-end without credit flow.</td><td><span class="partial">DESIGNED, NOT LIVE</span></td></tr>
+    <tr><td>Block visibility</td><td>Return 404 not 403 — never confirm block exists</td><td>Implemented in users + events endpoints ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>Architecture</td><td>Modular Monolith — 9 modules, extractable to microservices</td><td>Module-based structure followed ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>Seat assignment</td><td>Auto-assign ORDER BY queue_position ASC</td><td>Logic built in booking service ✓ — not fully exercised</td><td><span class="partial">BUILT, NOT TESTED</span></td></tr>
+    <tr><td>Logging</td><td>Pino + CloudWatch + Sentry</td><td>Not implemented — basic console only</td><td><span class="missing">NOT FOLLOWED</span></td></tr>
+    <tr><td>Popularity score</td><td>view_count now, full algorithm Phase 2</td><td>view_count incremented on detail fetch ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>Search</td><td>tags[] for filtering now, search_vector Phase 2</td><td>tags[] implemented and filterable ✓</td><td><span class="match">FOLLOWED</span></td></tr>
+    <tr><td>Admin panel</td><td>Event/venue/discount management via admin endpoints</td><td>Built user management + stats instead. Event creation is via direct DB currently.</td><td><span class="changed">DEVIATED</span></td></tr>
+  </table>
+
+  <hr class="divider" />
+
+  <!-- ═══ 7. SUGGESTIONS ═══ -->
+  <h2 id="suggestions">7. Suggestions &amp; Improvements (Phase 2)</h2>
+
+  <div class="section-intro">
+    These suggestions are ordered by priority. The first 5 are blockers for going live. The rest are improvements that would take the project from "portfolio" to "production-grade."
+  </div>
+
+  <!-- S1 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">1</div>
+      <div>
+        <div class="s-title">Complete End-to-End Payment Flow <span class="s-priority p-critical">CRITICAL — Blocker for Live</span></div>
+        <div class="s-phase">Phase 2 — Core Feature</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>The master document's entire payment model — credits, Razorpay, atomic deduction — is built in the backend but not connected. This is the most important thing to finish before going live.</p>
+      <ul>
+        <li>Create Razorpay test account → get API keys → add to <code>.env</code></li>
+        <li>Wire the booking payment flow to call the 9-step atomic transaction in booking.service.ts (SELECT FOR UPDATE on credit_balances + event_sections)</li>
+        <li>Test the Razorpay webhook with ngrok locally before deploying</li>
+        <li>Add credit balance display to the frontend (Profile page or dedicated Credits page)</li>
+        <li>Seed test users with credit balances to enable end-to-end booking tests</li>
+      </ul>
+      <div class="code-block"><span class="c">// The full 9-step atomic transaction already exists in booking.service.ts</span>
+<span class="c">// Just needs to be called from the payment endpoint + frontend flow</span>
+<span class="g">POST /bookings/:id/payment</span>  <span class="c">→ triggers the atomic TX → CONFIRMED</span>
+<span class="g">POST /credits/recharge/initiate</span>  <span class="c">→ returns Razorpay order_id</span>
+<span class="g">POST /credits/recharge/webhook</span>  <span class="c">→ verifies HMAC → adds credits (already built)</span></div>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">2</div>
+      <div>
+        <div class="s-title">Deploy to AWS (EC2 + RDS) — Make It Live <span class="s-priority p-critical">CRITICAL — Blocker for Live</span></div>
+        <div class="s-phase">Phase 2 — Infrastructure</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>The master planned AWS EC2 + RDS + Docker from the start. The docker-compose.yml is ready. This is a configuration task, not a code task.</p>
+      <ul>
+        <li>Launch EC2 t2.micro (free tier 12 months) — install Docker + Docker Compose</li>
+        <li>Launch RDS db.t3.micro PostgreSQL 15 — get connection string</li>
+        <li>Update <code>.env</code> for production (DATABASE_URL, REDIS_URL, JWT secrets)</li>
+        <li>Run <code>docker-compose up -d</code> on EC2 — server + Redis run as containers</li>
+        <li>Deploy frontend to Vercel — connect GitHub repo, one click</li>
+        <li>Point Vite proxy to production API URL</li>
+        <li>Set up Cloudflare DNS (free) for custom domain</li>
+      </ul>
+      <p>Order: RDS → EC2 (deploy backend) → Vercel (deploy frontend) → verify health check → run smoke tests.</p>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">3</div>
+      <div>
+        <div class="s-title">Set Up GitHub Actions CI/CD Pipeline <span class="s-priority p-critical">CRITICAL — Blocker for Live</span></div>
+        <div class="s-phase">Phase 2 — DevOps</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>The master specified a 5-stage pipeline. This protects against broken deploys and is required before sharing the project publicly.</p>
+      <div class="code-block"><span class="c"># .github/workflows/ci.yml — planned pipeline</span>
+<span class="v">on:</span> push + PR to main
+
+<span class="y">Stage 1 — CI:</span>
+  npm ci
+  npx tsc --noEmit        <span class="c"># TypeScript check</span>
+  npx jest                <span class="c"># Run tests</span>
+  npm audit --audit-level high  <span class="c"># Fail on HIGH/CRITICAL vulns</span>
+  npx eslint .
+
+<span class="y">Stage 2 — Build:</span>
+  docker build -t eventmeet-server .
+  docker tag eventmeet-server [ECR-URL]:${{ github.sha }}
+  docker push [ECR-URL]:${{ github.sha }}
+
+<span class="y">Stage 3 — Deploy to EC2:</span>
+  ssh into EC2
+  docker pull [ECR-URL]:${{ github.sha }}
+  docker-compose up -d --no-deps server</div>
+      <p>Frontend (Vercel) auto-deploys on GitHub push — no extra config needed for that.</p>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">4</div>
+      <div>
+        <div class="s-title">Write Integration Tests for Booking + Auth Flow <span class="s-priority p-high">HIGH — Before CI/CD</span></div>
+        <div class="s-phase">Phase 2 — Quality</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>The master required Jest tests to pass before any deploy. The booking flow has concurrency logic (distributed locks, SELECT FOR UPDATE) that is impossible to verify manually. Minimum test set:</p>
+      <ul>
+        <li><strong>Auth tests:</strong> register → verify email → login → get access token → refresh → logout</li>
+        <li><strong>Booking concurrency test:</strong> 2 concurrent requests to book the last 1 seat — verify only 1 succeeds and the other gets a clean error (not a data corruption)</li>
+        <li><strong>Payment idempotency test:</strong> Send same payment request twice with same idempotency key — verify credits deducted only once</li>
+        <li><strong>Refund idempotency test:</strong> Trigger refund job twice for same cancelled booking — verify credits added only once</li>
+        <li><strong>Notification creation test:</strong> Accept a connection → verify notification created in DB + socket event emitted</li>
+      </ul>
+      <p>Use Supertest for HTTP-level integration tests against a test database. These 5 tests would cover the 3 most critical paths in the application.</p>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">5</div>
+      <div>
+        <div class="s-title">Configure AWS SES + S3 for Emails and Tickets <span class="s-priority p-high">HIGH — Core UX</span></div>
+        <div class="s-phase">Phase 2 — Infrastructure</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>Email verification currently sends no real email — users cannot verify their accounts in production. Tickets cannot be downloaded. Both are free tier AWS services.</p>
+      <ul>
+        <li>Verify a sender domain in AWS SES (sandbox → production request)</li>
+        <li>Add SES credentials to <code>.env</code> — email.service.ts is already built</li>
+        <li>Create S3 bucket for ticket PDFs — private, no public access</li>
+        <li>Set up CloudFront distribution pointing to S3 — for pre-signed URL generation</li>
+        <li>Wire the BullMQ ticket generation job to actually produce a PDF (use <code>pdfkit</code> or <code>puppeteer</code>) and upload to S3</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">6</div>
+      <div>
+        <div class="s-title">Add Pino Logging + Sentry Error Tracking <span class="s-priority p-high">HIGH — Production Visibility</span></div>
+        <div class="s-phase">Phase 2 — Observability</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>Without structured logging, debugging a failed payment in production is nearly impossible. Pino is a 15-minute setup. Sentry's free tier covers 5,000 errors/month.</p>
+      <div class="code-block"><span class="c">// Replace console.log with Pino (one-time setup)</span>
+<span class="v">import pino from 'pino'</span>
+<span class="g">export const logger = pino({ level: process.env.LOG_LEVEL || 'info' })</span>
+
+<span class="c">// Log every booking state transition</span>
+logger.info({ bookingId, fromStatus, toStatus, userId }, 'Booking state changed')
+
+<span class="c">// Log every payment attempt</span>
+logger.info({ bookingId, amount, userId, idempotencyKey }, 'Payment attempt')
+
+<span class="c">// Sentry — wrap Express app (3 lines)</span>
+Sentry.init({ dsn: process.env.SENTRY_DSN })
+app.use(Sentry.Handlers.requestHandler())
+app.use(Sentry.Handlers.errorHandler())</div>
+    </div>
+  </div>
+
+  <!-- S7 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">7</div>
+      <div>
+        <div class="s-title">Build the Full Group Booking State Machine in Frontend <span class="s-priority p-high">HIGH — Core Feature</span></div>
+        <div class="s-phase">Phase 2 — Core Product</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>The backend supports the complete 7-stage booking flow. The frontend only uses PAYMENT_PENDING → CONFIRMED. The group booking experience — which is EventMeet's core differentiator — is not accessible to users yet.</p>
+      <ul>
+        <li>INITIATED stage: Show "Waiting for participants to accept" screen with 24hr countdown</li>
+        <li>QUEUE_PENDING stage: Show queue reorder UI — drag-and-drop position management</li>
+        <li>SEATS_PENDING stage: Show section selector with auto-assigned seat preview</li>
+        <li>PAYMENT_PENDING stage: Show per-person amount, credit balance check, "who is short" display</li>
+        <li>Wire BOOKING_INVITE socket event to show interactive booking invite card in chat</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- S8 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">8</div>
+      <div>
+        <div class="s-title">Add Admin Event + Venue Management UI <span class="s-priority p-high">HIGH — Required for Launch</span></div>
+        <div class="s-phase">Phase 2 — Admin</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>Currently, events and venues can only be created via direct DB access or Prisma Studio. The master planned POST /admin/events, POST /admin/venues, POST /admin/discount-rules. These are needed before launch — there's no way to onboard content otherwise.</p>
+      <ul>
+        <li>Add "Create Event" form to Admin Dashboard — maps to POST /admin/events</li>
+        <li>Add "Create Venue" form — maps to POST /admin/venues</li>
+        <li>Add discount rule management — maps to POST /admin/discount-rules</li>
+        <li>Add PATCH /admin/events/:id for publish/cancel actions</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- S9 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">9</div>
+      <div>
+        <div class="s-title">Write a Prisma Seed Script <span class="s-priority p-medium">MEDIUM — Developer Productivity</span></div>
+        <div class="s-phase">Phase 2 — DX</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>The master required a seed script runnable with <code>npx prisma db seed</code> that resets the database to a clean, testable state in 10 seconds. Currently, test data is added manually via Prisma Studio — which means a fresh environment takes hours to set up.</p>
+      <div class="code-block"><span class="c">// prisma/seed.ts — should create:</span>
+10 users (mix verified + unverified, 2 admins, various cities)
+3 venues (Mumbai, Delhi, Bangalore with sections)
+8 events (mix PUBLISHED + DRAFT, various categories)
+3 sections per event (Floor, Balcony, VIP — different prices)
+Connections (some ACCEPTED with chats, some PENDING)
+5 conversations (mix DIRECT + GROUP)
+Credit balances (various amounts — some sufficient, some insufficient)</div>
+    </div>
+  </div>
+
+  <!-- S10 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">10</div>
+      <div>
+        <div class="s-title">Create a Shared Types Package <code>packages/types</code> <span class="s-priority p-medium">MEDIUM — Architecture</span></div>
+        <div class="s-phase">Phase 2 — Code Quality</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>The monorepo's biggest missed opportunity. Backend and frontend both define the same types independently — they drifted 5 times (isBanned vs isActive, initiator vs user, isAdmin missing, sendPaginated shape, fullName nullable). A shared package fixes this class of bug entirely.</p>
+      <div class="code-block"><span class="c">// packages/types/src/index.ts</span>
+<span class="v">export interface ApiUser</span> {
+  id: string
+  email: string
+  fullName: string | null
+  isAdmin: boolean
+  isActive: boolean
+  isVerified: boolean
+}
+
+<span class="v">export interface PaginatedResponse</span>&lt;T&gt; {
+  data: T[]
+  pagination: {
+    page: number; limit: number; total: number; hasMore: boolean
+    extra?: Record&lt;string, unknown&gt;
+  }
+}
+
+<span class="c">// apps/server — imports the same type</span>
+<span class="c">// apps/web — imports the same type</span>
+<span class="c">// Change once → both sides update automatically</span></div>
+    </div>
+  </div>
+
+  <!-- S11 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">11</div>
+      <div>
+        <div class="s-title">Fix Git Branch Strategy to Match Master Plan <span class="s-priority p-medium">MEDIUM — Process</span></div>
+        <div class="s-phase">Phase 2 — Git Hygiene</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>The master defined: main / staging / dev / feature/* / hotfix/*. Currently only main and feature/frontend exist — and feature/frontend hasn't been merged yet.</p>
+      <ul>
+        <li>Merge <code>feature/frontend</code> → <code>main</code> (squash or merge commit)</li>
+        <li>Create <code>develop</code> branch from main — all new feature branches cut from here</li>
+        <li>Create <code>staging</code> branch — auto-deploys to staging EC2 when CI passes</li>
+        <li>Protect main branch — require CI pass + PR review before merge</li>
+        <li>Future work: <code>feature/payments</code>, <code>feature/full-booking-flow</code>, <code>feature/admin-events</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- S12 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">12</div>
+      <div>
+        <div class="s-title">Add GET /auth/me on App Load to Refresh User Store <span class="s-priority p-medium">MEDIUM — Auth Correctness</span></div>
+        <div class="s-phase">Phase 2 — Auth</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>The Zustand auth store is populated at login time and never refreshed. If a user's <code>isAdmin</code> status changes (or they get banned) while they're logged in, their session reflects old data until they sign out. This is a latent bug that will become real once users start logging in regularly.</p>
+      <div class="code-block"><span class="c">// In main.tsx or App.tsx — call on first render</span>
+<span class="v">useEffect</span>(() => {
+  <span class="g">api.get('/users/me').then(res => {</span>
+    <span class="g">useAuthStore.getState().setUser(res.data.data)</span>
+  <span class="g">}).catch(() => {})</span>  <span class="c">// silent fail — token may already be expired</span>
+}, [])</div>
+    </div>
+  </div>
+
+  <!-- S13 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">13</div>
+      <div>
+        <div class="s-title">Define Reusable Prisma Select Constants <span class="s-priority p-low">LOW — Code Quality</span></div>
+        <div class="s-phase">Phase 2 — Refactoring</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>Every service file defines its own inline <code>select: { id: true, email: true, ... }</code> objects. When a field needs to be added (like <code>isAdmin: true</code>), you have to hunt through every service to find every select. This caused Bug #19.</p>
+      <div class="code-block"><span class="c">// apps/server/src/lib/selects.ts — define once</span>
+<span class="v">export const userPublicSelect</span> = {
+  id: true, email: true, fullName: true,
+  avatarUrl: true, isAdmin: true, isActive: true,
+  isVerified: true, city: true, averageRating: true,
+} <span class="v">satisfies</span> Prisma.UserSelect
+
+<span class="c">// In any service file</span>
+<span class="g">import { userPublicSelect } from '@/lib/selects'</span>
+prisma.user.findUnique({ where: { id }, select: userPublicSelect })</div>
+    </div>
+  </div>
+
+  <!-- S14 -->
+  <div class="suggestion-card">
+    <div class="s-header">
+      <div class="s-num">14</div>
+      <div>
+        <div class="s-title">Add Rate Limiting Per-Endpoint as Planned in Master <span class="s-priority p-low">LOW — Security Hardening</span></div>
+        <div class="s-phase">Phase 2 — Security</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <p>The master specified granular rate limits. Currently a single global limiter is applied. The specific limits from the master are not enforced.</p>
+      <table style="margin-top: 8px;">
+        <tr><th>Endpoint Group</th><th>Master Limit</th><th>Current</th></tr>
+        <tr><td>Auth endpoints</td><td>5 req/min</td><td>General limit</td></tr>
+        <tr><td>General API</td><td>100 req/min</td><td>Applied ✓</td></tr>
+        <tr><td>Booking endpoints</td><td>10 req/min</td><td>General limit</td></tr>
+        <tr><td>Chat send</td><td>60 req/min</td><td>General limit</td></tr>
+      </table>
+      <p style="margin-top: 10px;">Auth rate limit is most important — 5 req/min prevents brute force on login/register. Apply via a separate <code>authLimiter</code> middleware on the auth router.</p>
+    </div>
+  </div>
+
+  <br><br>
+  <div style="background: #0f0c29; border: 1px solid #302b63; border-radius: 12px; padding: 24px; margin-top: 40px;">
+    <p style="font-weight: 700; color: #a78bfa; margin-bottom: 10px;">Phase 2 Priority Order</p>
+    <p style="color: #c9c8d8; font-size: 13px; margin: 0;">
+      <strong style="color:#ef4444;">Blockers (must do before live):</strong> S1 (Payment) → S2 (Deploy AWS) → S3 (CI/CD) → S5 (SES + S3)<br><br>
+      <strong style="color:#fbbf24;">High impact (shortly after launch):</strong> S4 (Tests) → S6 (Logging + Sentry) → S7 (Full Booking Flow) → S8 (Admin Event UI)<br><br>
+      <strong style="color:#60a5fa;">Medium term (Phase 2 hardening):</strong> S9 (Seed Script) → S10 (Shared Types) → S11 (Git Strategy) → S12 (Auth/Me refresh)<br><br>
+      <strong style="color:#34d399;">Low — polish:</strong> S13 (Prisma Select constants) → S14 (Granular rate limits)
+    </p>
+  </div>
+
+  <br><br>
+  <p style="text-align:center; color:#aaa; font-size:12px;">EventMeet — Master Doc v1.2 vs Built Analysis &nbsp;|&nbsp; March 2026 &nbsp;|&nbsp; Based on EventMeet_MasterDoc_v1.2 &amp; EventMeet_HLD_v1.1</p>
+  <br>
+
+</div>
+</body>
+</html>

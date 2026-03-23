@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
-  MapPin, Clock, Users, Banknote, ArrowLeft, Calendar,
-  CheckCircle, Loader2, Globe, Tag, Eye
+  MapPin, Users, Banknote, ArrowLeft, Calendar,
+  CheckCircle, Loader2, Globe, Tag, Eye, UserPlus
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { useAuthStore } from '@/store/auth.store'
 import { api } from '@/lib/api'
 import { cn, formatDate, formatTime, formatCurrency } from '@/lib/utils'
 import type { Event, EventSection, AvailableUser } from '@/types/event'
@@ -19,9 +21,11 @@ export default function EventDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const myId = useAuthStore(s => s.user?.id ?? '')
   const [selectedSection, setSelectedSection] = useState<string | null>(null)
   const [availNote, setAvailNote] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
+  const [connectingId, setConnectingId] = useState<string | null>(null)
 
   const { data: event, isLoading, isError } = useQuery<Event>({
     queryKey: ['event', id],
@@ -36,10 +40,38 @@ export default function EventDetail() {
     queryKey: ['event-available-users', id],
     queryFn: async () => {
       const res = await api.get(`/events/${id}/available-users`)
-      return res.data.data
+      // API returns [{ id, note, user: { id, fullName, avatarUrl } }]
+      // Normalize to flat AvailableUser shape
+      return (res.data.data as Array<{
+        id: string
+        note: string | null
+        user: { id: string; fullName: string | null; avatarUrl: string | null }
+      }>).map(a => ({
+        id:        a.user.id,
+        fullName:  a.user.fullName,
+        avatarUrl: a.user.avatarUrl,
+        note:      a.note,
+      }))
     },
     enabled: !!id,
   })
+
+  // Fetch current user's availability status on load
+  const { data: myAvail } = useQuery({
+    queryKey: ['event-my-availability', id],
+    queryFn: async () => {
+      const res = await api.get(`/events/${id}/my-availability`)
+      return res.data.data as { isAvailable: boolean; note: string | null }
+    },
+    enabled: !!id,
+  })
+
+  // Sync server state → local state (runs once when data arrives)
+  useEffect(() => {
+    if (myAvail !== undefined) {
+      setIsAvailable(myAvail.isAvailable)
+    }
+  }, [myAvail])
 
   const availMutation = useMutation({
     mutationFn: async () => {
@@ -53,8 +85,24 @@ export default function EventDetail() {
       setIsAvailable(prev => !prev)
       queryClient.invalidateQueries({ queryKey: ['event', id] })
       queryClient.invalidateQueries({ queryKey: ['event-available-users', id] })
+      queryClient.invalidateQueries({ queryKey: ['event-my-availability', id] })
     },
   })
+
+  async function handleConnect(receiverId: string) {
+    if (!id) return
+    setConnectingId(receiverId)
+    try {
+      await api.post(`/connections/events/${id}/users/${receiverId}`, {})
+      toast.success('Connection request sent!')
+      queryClient.invalidateQueries({ queryKey: ['connections-sent'] })
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg ?? 'Could not send request')
+    } finally {
+      setConnectingId(null)
+    }
+  }
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -268,14 +316,27 @@ export default function EventDetail() {
                   <div key={user.id} className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center flex-shrink-0 text-white text-xs font-bold overflow-hidden">
                       {user.avatarUrl
-                        ? <img src={user.avatarUrl} alt={user.fullName} className="w-full h-full object-cover" />
-                        : user.fullName.charAt(0).toUpperCase()
+                        ? <img src={user.avatarUrl} alt={user.fullName ?? ''} className="w-full h-full object-cover" />
+                        : (user.fullName?.charAt(0)?.toUpperCase() ?? '?')
                       }
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="text-text-primary text-xs font-medium truncate">{user.fullName}</p>
                       {user.note && <p className="text-text-disabled text-xs truncate">{user.note}</p>}
                     </div>
+                    {user.id !== myId && (
+                      <button
+                        onClick={() => handleConnect(user.id)}
+                        disabled={connectingId === user.id}
+                        title="Send connection request"
+                        className="w-7 h-7 rounded-full bg-violet/10 hover:bg-violet/20 flex items-center justify-center flex-shrink-0 transition-colors"
+                      >
+                        {connectingId === user.id
+                          ? <Loader2 className="w-3.5 h-3.5 text-violet animate-spin" />
+                          : <UserPlus className="w-3.5 h-3.5 text-violet" />
+                        }
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -289,8 +350,8 @@ export default function EventDetail() {
           <div className="card flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden">
               {event.creator.avatarUrl
-                ? <img src={event.creator.avatarUrl} alt={event.creator.fullName} className="w-full h-full object-cover" />
-                : event.creator.fullName.charAt(0).toUpperCase()
+                ? <img src={event.creator.avatarUrl} alt={event.creator.fullName ?? ''} className="w-full h-full object-cover" />
+                : (event.creator.fullName?.charAt(0)?.toUpperCase() ?? '?')
               }
             </div>
             <div>
