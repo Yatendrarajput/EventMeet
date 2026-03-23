@@ -8,5 +8,6 @@ export interface AuthUser {
   email: string
   fullName: string
   isVerified: boolean
+  isAdmin:    boolean
   emailVerifiedAt: Date | null
 }
