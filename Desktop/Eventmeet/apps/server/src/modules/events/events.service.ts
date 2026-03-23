@@ -124,6 +124,14 @@ export async function setAvailability(userId: string, eventId: string, input: Se
 // ─────────────────────────────────────────────────────────────────
 // Remove user availability
 // ─────────────────────────────────────────────────────────────────
+export async function getMyAvailability(userId: string, eventId: string) {
+  const availability = await prisma.eventAvailability.findUnique({
+    where: { userId_eventId: { userId, eventId } },
+    select: { id: true, status: true, note: true },
+  })
+  return { isAvailable: availability?.status === 'ACTIVE', note: availability?.note ?? null }
+}
+
 export async function removeAvailability(userId: string, eventId: string) {
   const existing = await prisma.eventAvailability.findUnique({
     where: { userId_eventId: { userId, eventId } },

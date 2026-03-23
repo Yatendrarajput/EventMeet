@@ -88,6 +88,7 @@ export async function login(
       fullName: true,
       passwordHash: true,
       isVerified: true,
+      isAdmin: true,
       emailVerifiedAt: true,
       isActive: true,
       deletedAt: true,

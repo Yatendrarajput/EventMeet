@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EventMeet — Full Backend Documentation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.7; color: #1a1a2e; background: #fff; }
+
+    /* Cover */
+    .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; text-align: center; padding: 60px 40px; }
+    .cover .badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 6px 20px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px; color: #e94560; }
+    .cover h1 { font-size: 56px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; background: linear-gradient(90deg, #fff, #e94560); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .cover .subtitle { font-size: 18px; opacity: 0.8; margin-bottom: 40px; max-width: 600px; }
+    .cover .meta { display: flex; gap: 50px; margin-top: 40px; flex-wrap: wrap; justify-content: center; }
+    .cover .meta-item { text-align: center; }
+    .cover .meta-item .val { font-size: 36px; font-weight: 700; color: #e94560; }
+    .cover .meta-item .lbl { font-size: 11px; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+    .cover .updated { margin-top: 60px; font-size: 12px; opacity: 0.4; }
+
+    /* Layout */
+    .page { max-width: 980px; margin: 0 auto; padding: 60px 40px; }
+    h2 { font-size: 28px; font-weight: 700; color: #0f3460; border-bottom: 3px solid #e94560; padding-bottom: 10px; margin: 60px 0 24px; }
+    h3 { font-size: 16px; font-weight: 700; color: #16213e; margin: 28px 0 10px; }
+    h4 { font-size: 12px; font-weight: 700; color: #e94560; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: 1px; }
+    p  { margin-bottom: 12px; color: #444; }
+
+    /* Badges */
+    .done    { display: inline-block; background: #d1fae5; color: #065f46; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; }
+    .tested  { display: inline-block; background: #dbeafe; color: #1e40af; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; }
+    .built   { display: inline-block; background: #fce7f3; color: #9d174d; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; }
+    .pending { display: inline-block; background: #fef3c7; color: #92400e; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; }
+    .next    { display: inline-block; background: #ede9fe; color: #5b21b6; border-radius: 20px; padding: 2px 12px; font-size: 11px; font-weight: 700; }
+
+    /* Phase cards */
+    .phase-card { border: 1px solid #e5e7eb; border-radius: 14px; padding: 28px; margin-bottom: 24px; position: relative; overflow: hidden; }
+    .phase-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #e94560; }
+    .phase-card.upcoming::before { background: #9ca3af; }
+    .phase-card .phase-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+    .phase-card .phase-num { font-size: 11px; font-weight: 700; color: #e94560; text-transform: uppercase; letter-spacing: 1px; }
+    .phase-card .phase-title { font-size: 18px; font-weight: 700; color: #1a1a2e; margin: 4px 0 8px; }
+    .phase-card .phase-desc { color: #555; font-size: 13px; margin-bottom: 16px; }
+
+    /* Endpoint list */
+    .endpoint-list { list-style: none; }
+    .endpoint-list li { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+    .endpoint-list li:last-child { border-bottom: none; }
+    .endpoint-list .desc { color: #666; flex: 1; }
+    .method { display: inline-block; width: 58px; text-align: center; border-radius: 4px; padding: 2px 0; font-size: 10px; font-weight: 700; flex-shrink: 0; font-family: monospace; }
+    .get    { background: #d1fae5; color: #065f46; }
+    .post   { background: #dbeafe; color: #1e40af; }
+    .patch  { background: #fef3c7; color: #92400e; }
+    .delete { background: #fee2e2; color: #991b1b; }
+    .route  { font-family: 'Courier New', monospace; font-size: 12px; color: #0f3460; flex-shrink: 0; min-width: 280px; }
+
+    /* Tech stack */
+    .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin: 20px 0; }
+    .tech-item { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; }
+    .tech-item .tech-name { font-weight: 700; color: #0f3460; font-size: 13px; margin-bottom: 4px; }
+    .tech-item .tech-ver  { font-size: 11px; color: #e94560; font-family: monospace; }
+    .tech-item .tech-use  { font-size: 11px; color: #666; margin-top: 4px; }
+
+    /* Summary table */
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+    th { background: #0f3460; color: white; padding: 10px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 10px 14px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+    tr:hover td { background: #f8fafc; }
+
+    /* Flow diagram */
+    .flow { background: #0f3460; color: #e2e8f0; border-radius: 12px; padding: 28px; font-family: 'Courier New', monospace; font-size: 12px; line-height: 2; margin: 20px 0; overflow-x: auto; }
+    .flow .accent { color: #e94560; }
+    .flow .green  { color: #34d399; }
+    .flow .yellow { color: #fbbf24; }
+
+    /* Info box */
+    .info  { background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; font-size: 13px; color: #1e40af; }
+    .warn  { background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; font-size: 13px; color: #92400e; }
+    .success { background: #f0fdf4; border-left: 4px solid #22c55e; border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0; font-size: 13px; color: #15803d; }
+
+    /* Git branch tree */
+    .git-tree { background: #1a1a2e; color: #e2e8f0; border-radius: 12px; padding: 24px; font-family: 'Courier New', monospace; font-size: 12px; line-height: 2; margin: 16px 0; }
+    .git-tree .branch-main   { color: #f87171; }
+    .git-tree .branch-dev    { color: #34d399; }
+    .git-tree .branch-feat   { color: #60a5fa; }
+    .git-tree .commit        { color: #fbbf24; }
+
+    /* Section toc */
+    .toc { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px 28px; margin: 30px 0; }
+    .toc h3 { margin-top: 0; margin-bottom: 14px; color: #0f3460; }
+    .toc ol { padding-left: 20px; }
+    .toc li { padding: 3px 0; color: #444; font-size: 13px; }
+    .toc a  { color: #0f3460; text-decoration: none; }
+    .toc a:hover { color: #e94560; }
+
+    /* Progress bar */
+    .progress-wrap { background: #e5e7eb; border-radius: 999px; height: 8px; margin: 8px 0; }
+    .progress-bar  { height: 8px; border-radius: 999px; background: linear-gradient(90deg, #e94560, #0f3460); }
+
+    /* Checklist */
+    .checklist { list-style: none; padding: 0; }
+    .checklist li { padding: 5px 0; font-size: 13px; color: #444; }
+    .checklist li::before { content: '✅ '; }
+    .checklist li.pending::before { content: '⏳ '; }
+    .checklist li.next::before { content: '🔜 '; }
+
+    @media print {
+      .cover { page-break-after: always; }
+      .phase-card { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════ COVER -->
+<div class="cover">
+  <div class="badge">Technical Documentation — v1.0</div>
+  <h1>EventMeet</h1>
+  <p class="subtitle">A social event-discovery platform where people find others attending the same events, connect, and book group experiences together.</p>
+  <div class="meta">
+    <div class="meta-item"><div class="val">13</div><div class="lbl">Phases Complete</div></div>
+    <div class="meta-item"><div class="val">60</div><div class="lbl">API Endpoints</div></div>
+    <div class="meta-item"><div class="val">21</div><div class="lbl">DB Tables</div></div>
+    <div class="meta-item"><div class="val">11</div><div class="lbl">Frontend Pages</div></div>
+  </div>
+  <div class="updated">Last Updated: March 2026 &nbsp;|&nbsp; Backend: 100% Complete &nbsp;|&nbsp; Frontend: 100% Complete (Phase 13)</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ PAGE -->
+<div class="page">
+
+  <!-- TABLE OF CONTENTS -->
+  <div class="toc">
+    <h3>Table of Contents</h3>
+    <ol>
+      <li><a href="#overview">Project Overview & Architecture</a></li>
+      <li><a href="#techstack">Technology Stack</a></li>
+      <li><a href="#database">Database Schema (21 Tables)</a></li>
+      <li><a href="#gitflow">Git Branch Strategy</a></li>
+      <li><a href="#phases">All 12 Backend Phases</a></li>
+      <li><a href="#endpoints">Complete API Reference (59 Endpoints)</a></li>
+      <li><a href="#flows">Key Business Flows</a></li>
+      <li><a href="#testing">Testing Status</a></li>
+      <li><a href="#roadmap">Roadmap — What's Next</a></li>
+      <li><a href="#frontend-arch">Frontend Architecture</a></li>
+      <li><a href="#design-system">Design System</a></li>
+      <li><a href="#lifecycle">Data Lifecycle — Frontend ↔ Backend</a></li>
+      <li><a href="#auth-flow">Auth Flow — Login to Protected Page</a></li>
+      <li><a href="#frontend-pages">Frontend Pages Built</a></li>
+    </ol>
+  </div>
+
+  <!-- ─── 1. OVERVIEW ─────────────────────────────────────────────── -->
+  <h2 id="overview">1. Project Overview & Architecture</h2>
+
+  <p>EventMeet is a full-stack monorepo application. Users discover events (concerts, sports, meetups), mark availability, get matched with other attendees, connect, book group tickets together, chat, and rate each other post-event.</p>
+
+  <h3>Monorepo Structure</h3>
+  <div class="flow">
+<span class="green">eventmeet/</span>
+├── apps/
+│   ├── <span class="accent">server/</span>          ← Node.js + Express + TypeScript (COMPLETE)
+│   │   ├── src/
+│   │   │   ├── config/          ← Zod-validated env config
+│   │   │   ├── lib/             ← prisma, redis, bullmq, socket
+│   │   │   ├── modules/         ← 14 feature modules
+│   │   │   ├── shared/          ← middleware, utils, types
+│   │   │   └── server.ts        ← bootstrap entry point
+│   │   └── prisma/
+│   │       └── schema.prisma    ← 21-table PostgreSQL schema
+│   └── <span class="yellow">web/</span>             ← React + TypeScript (UPCOMING — Phase 13)
+├── packages/
+│   └── shared/                  ← shared types (planned)
+├── docker-compose.yml           ← PostgreSQL 16 + Redis 7
+└── package.json                 ← Turborepo workspace
+  </div>
+
+  <h3>Infrastructure</h3>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">PostgreSQL 16</div><div class="tech-ver">Docker container</div><div class="tech-use">Primary database — port 5432</div></div>
+    <div class="tech-item"><div class="tech-name">Redis 7</div><div class="tech-ver">Docker container</div><div class="tech-use">Cache + Socket.io adapter + BullMQ — port 6379</div></div>
+    <div class="tech-item"><div class="tech-name">Node.js Server</div><div class="tech-ver">port 5000</div><div class="tech-use">REST API + WebSocket server</div></div>
+  </div>
+
+  <!-- ─── 2. TECH STACK ─────────────────────────────────────────── -->
+  <h2 id="techstack">2. Technology Stack</h2>
+
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">Express.js</div><div class="tech-ver">^4.19.2</div><div class="tech-use">HTTP server framework</div></div>
+    <div class="tech-item"><div class="tech-name">TypeScript</div><div class="tech-ver">^5.5.3</div><div class="tech-use">Type safety across all modules</div></div>
+    <div class="tech-item"><div class="tech-name">Prisma ORM</div><div class="tech-ver">^5.16.0</div><div class="tech-use">Type-safe DB access + migrations</div></div>
+    <div class="tech-item"><div class="tech-name">Socket.io</div><div class="tech-ver">^4.7.5</div><div class="tech-use">Real-time messaging & notifications</div></div>
+    <div class="tech-item"><div class="tech-name">BullMQ</div><div class="tech-ver">^5.12.0</div><div class="tech-use">Background job queues (tickets, emails, refunds)</div></div>
+    <div class="tech-item"><div class="tech-name">ioredis</div><div class="tech-ver">^5.4.1</div><div class="tech-use">Redis client for cache & locks</div></div>
+    <div class="tech-item"><div class="tech-name">Zod</div><div class="tech-ver">^3.23.8</div><div class="tech-use">Request validation schemas</div></div>
+    <div class="tech-item"><div class="tech-name">bcryptjs</div><div class="tech-ver">^2.4.3</div><div class="tech-use">Password hashing</div></div>
+    <div class="tech-item"><div class="tech-name">jsonwebtoken</div><div class="tech-ver">^9.0.2</div><div class="tech-use">JWT access + refresh tokens</div></div>
+    <div class="tech-item"><div class="tech-name">Razorpay</div><div class="tech-ver">^2.9.2</div><div class="tech-use">Payment gateway integration</div></div>
+    <div class="tech-item"><div class="tech-name">Cloudinary</div><div class="tech-ver">^2.4.0</div><div class="tech-use">Avatar & image storage</div></div>
+    <div class="tech-item"><div class="tech-name">Pino</div><div class="tech-ver">^9.3.2</div><div class="tech-use">Structured JSON logging</div></div>
+    <div class="tech-item"><div class="tech-name">Helmet</div><div class="tech-ver">^7.1.0</div><div class="tech-use">HTTP security headers</div></div>
+    <div class="tech-item"><div class="tech-name">express-rate-limit</div><div class="tech-ver">^7.4.0</div><div class="tech-use">Rate limiting per route</div></div>
+    <div class="tech-item"><div class="tech-name">Multer</div><div class="tech-ver">^1.4.5</div><div class="tech-use">File upload middleware</div></div>
+    <div class="tech-item"><div class="tech-name">uuid</div><div class="tech-ver">^10.0.0</div><div class="tech-use">QR code token generation</div></div>
+  </div>
+
+  <!-- ─── 3. DATABASE ──────────────────────────────────────────── -->
+  <h2 id="database">3. Database Schema (21 Tables)</h2>
+
+  <table>
+    <tr><th>Domain</th><th>Tables</th><th>Key Fields</th></tr>
+    <tr><td><strong>Identity & Auth</strong></td><td>users, email_verifications, password_resets</td><td>isAdmin, isVerified, isActive, averageRating</td></tr>
+    <tr><td><strong>Events</strong></td><td>venues, events, event_sections, event_availabilities</td><td>status (DRAFT/PUBLISHED/CANCELLED), availableSeats</td></tr>
+    <tr><td><strong>Connections</strong></td><td>connection_requests</td><td>status (PENDING/ACCEPTED/DECLINED), isQuickConnect</td></tr>
+    <tr><td><strong>Conversations</strong></td><td>conversations, conversation_members, messages, group_invites</td><td>type (DM/GROUP), role (ADMIN/MEMBER)</td></tr>
+    <tr><td><strong>Bookings</strong></td><td>bookings, booking_participants, booking_invites, tickets</td><td>status (PAYMENT_PENDING/CONFIRMED/CANCELLED), softReservationExpiresAt</td></tr>
+    <tr><td><strong>Payments</strong></td><td>credit_balances, credit_transactions, refunds, discount_rules</td><td>TransactionType (RECHARGE/BOOKING_DEBIT/REFUND)</td></tr>
+    <tr><td><strong>Social</strong></td><td>ratings, notifications</td><td>score (1–5), tags[], NotificationType (13 types)</td></tr>
+  </table>
+
+  <div class="info">All UUIDs are generated using PostgreSQL's <code>gen_random_uuid()</code>. All timestamps use <code>Timestamptz</code> (timezone-aware). Soft deletes use <code>deletedAt</code> field pattern.</div>
+
+  <!-- ─── 4. GIT FLOW ───────────────────────────────────────────── -->
+  <h2 id="gitflow">4. Git Branch Strategy</h2>
+
+  <div class="git-tree">
+<span class="branch-main">main</span>          ← production-ready, protected
+└── <span class="branch-dev">develop</span>      ← integration branch (all features merged here)
+    ├── <span class="branch-feat">feature/auth</span>          <span class="commit">✓ merged</span>  — Phase 2
+    ├── <span class="branch-feat">feature/users</span>         <span class="commit">✓ merged</span>  — Phase 3
+    ├── <span class="branch-feat">feature/events</span>        <span class="commit">✓ merged</span>  — Phase 4
+    ├── <span class="branch-feat">feature/connections</span>   <span class="commit">✓ merged</span>  — Phase 5
+    ├── <span class="branch-feat">feature/conversations</span> <span class="commit">✓ merged</span>  — Phase 6
+    ├── <span class="branch-feat">feature/bookings</span>      <span class="commit">✓ merged</span>  — Phase 7
+    ├── <span class="branch-feat">feature/payments</span>      <span class="commit">✓ merged</span>  — Phase 8
+    ├── <span class="branch-feat">feature/notifications</span> <span class="commit">✓ merged</span>  — Phase 9
+    ├── <span class="branch-feat">feature/ratings</span>       <span class="commit">✓ merged</span>  — Phase 10
+    ├── <span class="branch-feat">feature/credits</span>       <span class="commit">✓ merged</span>  — Phase 11
+    ├── <span class="branch-feat">feature/admin</span>         <span class="commit">✓ merged</span>  — Phase 12
+    └── <span class="branch-feat">feature/frontend</span>      <span class="commit">⟳ pending merge</span> — Phase 13 (React frontend — complete)
+  </div>
+
+  <p><strong>Rules followed:</strong> Never commit directly to main. Each phase = one feature branch off develop. Feature complete → PR to develop → merged. Milestone → develop → main.</p>
+
+  <!-- ─── 5. PHASES ─────────────────────────────────────────────── -->
+  <h2 id="phases">5. All 12 Backend Phases</h2>
+
+  <!-- Phase 1 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 1</div><div class="phase-title">Foundation & Infrastructure</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">Monorepo setup, Docker services, Prisma schema, Express server with all middleware, Socket.io + Redis adapter, BullMQ queues.</p>
+    <h4>What was built</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>Turborepo monorepo with <code>apps/server</code> and <code>apps/web</code> workspaces</li>
+      <li>Docker Compose: PostgreSQL 16 + Redis 7 with named volumes</li>
+      <li>Prisma schema with 21 tables across 7 domains</li>
+      <li>Express app with Helmet, CORS, Pino logging, rate limiting, body parsing</li>
+      <li>Socket.io server with Redis adapter for horizontal scaling</li>
+      <li>BullMQ queues: tickets, emails, refunds, cache-invalidate</li>
+      <li>Zod-validated environment config with type-safe <code>config</code> object</li>
+      <li>Structured error handler middleware with AppError class</li>
+      <li>Response utilities: sendSuccess, sendCreated, sendPaginated</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 2</div><div class="phase-title">Authentication Module</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">Full JWT-based auth with email verification, password reset, refresh token rotation, and Redis token blacklisting.</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>Access token: 15-minute TTL signed with <code>JWT_ACCESS_SECRET</code></li>
+      <li>Refresh token: 30-day TTL, stored in Redis with JTI tracking</li>
+      <li>Logout invalidates refresh token via Redis DEL (instant revocation)</li>
+      <li>Email verification token: HMAC SHA-256 hash stored in <code>email_verifications</code> table</li>
+      <li>Password reset token: same pattern, 1-hour expiry</li>
+      <li>Passwords hashed with bcrypt (10 salt rounds)</li>
+      <li>Rate limiting: 10 req/15min on auth routes</li>
+      <li>Anti-enumeration: forgot-password always returns 200</li>
+      <li>Dev mode: tokens logged to console (no email service needed)</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 3</div><div class="phase-title">Users Module</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">User profile management with Cloudinary avatar upload, soft delete, and public profile view.</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>Avatar upload: Multer (memory storage) → Cloudinary → URL stored in DB</li>
+      <li>Soft delete: sets <code>deletedAt = now()</code> and <code>isActive = false</code></li>
+      <li>Public profile: limited fields exposed (no email, no sensitive data)</li>
+      <li>Own profile: all non-sensitive fields</li>
+      <li>Updatable fields: fullName, username, bio, dateOfBirth, gender, phoneNumber, city, state, interests, lookingFor</li>
+      <li>Username uniqueness enforced at DB level</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- Phase 4 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 4</div><div class="phase-title">Events Module</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">Event listing, detail, availability marking, and social discovery of other attendees — with Redis caching.</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>Event list: Redis cached (5-minute TTL) with city, category, date filters</li>
+      <li>Event detail: cached with section seat counts</li>
+      <li>Availability: users mark themselves as ACTIVE/EXPIRED for an event</li>
+      <li>Available users list: excludes the requesting user (social discovery)</li>
+      <li>Admin create/update/delete events with section management</li>
+      <li>viewCount incremented on each detail fetch</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- Phase 5 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 5</div><div class="phase-title">Connections Module</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">Send, accept, decline, and remove connection requests between users at the same event.</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>Connection is event-scoped: sender + receiver + eventId (unique constraint)</li>
+      <li>Accept triggers Socket.io <code>connection:accepted</code> event to sender</li>
+      <li>Notification created on new request and on acceptance</li>
+      <li>Connection list shows mutual connections with user profiles</li>
+      <li>Cannot send to self — guarded in service layer</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- Phase 6 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 6</div><div class="phase-title">Conversations & Messaging</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">DM and group conversations with real-time Socket.io message delivery, pagination, and soft delete.</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>Two types: DM (2 members) and GROUP (up to 15 members)</li>
+      <li>DM enforces unique pair — no duplicate DM conversations</li>
+      <li>Messages paginated in reverse-chronological order (cursor-based)</li>
+      <li>Real-time: new messages emitted to all room members via Socket.io</li>
+      <li>Soft delete: messages get <code>deletedAt</code> timestamp, content replaced with "Message deleted"</li>
+      <li>Last message preview stored on conversation for inbox listing</li>
+      <li>Members must be in conversation to send/read messages</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- Phase 7 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 7</div><div class="phase-title">Bookings & Ticketing</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">Full booking lifecycle with Redis distributed seat locking, 15-minute soft reservation, Prisma transaction atomicity, and QR-coded ticket generation.</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>Seat lock: Redis <code>SET NX EX</code> pattern — only one booking can proceed at a time per section</li>
+      <li>Re-check seats under lock to prevent race conditions</li>
+      <li>Prisma transaction: seat decrement + booking create + participants create — all atomic</li>
+      <li>15-minute soft reservation: <code>softReservationExpiresAt</code> enforced on confirm</li>
+      <li>Confirm: booking → CONFIRMED, tickets generated with QR token <code>EVENTMEET-{bookingId}-{userId}-{uuid}</code></li>
+      <li>Cancel PAYMENT_PENDING: seats released back to section</li>
+      <li>Cancel CONFIRMED: seats not released (event already sold), tickets CANCELLED</li>
+      <li>BullMQ ticket delivery job queued on confirm</li>
+      <li>Socket.io events: <code>booking:confirmed</code> and <code>booking:cancelled</code></li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- Phase 8 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 8</div><div class="phase-title">Payments (Razorpay)</div></div>
+      <span class="built">Built — Razorpay account pending</span>
+    </div>
+    <p class="phase-desc">Razorpay order creation, HMAC payment verification, webhook handling, and refund queue via BullMQ.</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>Create Razorpay order from booking finalAmount (in paise)</li>
+      <li>Payment verification: HMAC SHA-256 of <code>orderId|paymentId</code> with Razorpay key secret</li>
+      <li>On verify success: booking → CONFIRMED, tickets generated, CreditTransaction recorded</li>
+      <li>Webhook endpoint for async payment events (requires Razorpay dashboard config)</li>
+      <li>Refund: queued via BullMQ refundQueue for async processing</li>
+      <li>Idempotency key on booking prevents duplicate orders</li>
+    </ul>
+    <div class="warn">Razorpay account setup needed before this can be tested end-to-end. Keys go in <code>.env</code>: RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET.</div>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:85%"></div></div>
+  </div>
+
+  <!-- Phase 9 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 9</div><div class="phase-title">Notifications Module</div></div>
+      <span class="built">Built</span>
+    </div>
+    <p class="phase-desc">In-app notification system with 13 notification types, Socket.io real-time push, and read/delete management.</p>
+    <h4>Notification Types</h4>
+    <p style="font-size:13px; color:#444; font-family: monospace;">CONNECTION_REQUEST · CONNECTION_ACCEPTED · GROUP_INVITE · BOOKING_INVITE · QUEUE_UPDATED · SEAT_ASSIGNED · BOOKING_CONFIRMED · BOOKING_CANCELLED · PAYMENT_FAILED · EVENT_CANCELLED · RATING_REMINDER · CREDITS_RECHARGED · QUICK_CONNECT_REQUEST</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>createNotification() is a shared internal function called by all other modules</li>
+      <li>Real-time delivery via Socket.io <code>notification:new</code> event to user's room</li>
+      <li>Unread count returned with every list response</li>
+      <li>Mark single or all as read, delete individual notifications</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:90%"></div></div>
+  </div>
+
+  <!-- Phase 10 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 10</div><div class="phase-title">Ratings & Reviews</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">Post-event peer rating system with score aggregation, tag-based feedback, and eligibility enforcement.</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>Rating is booking-scoped: both rater and rated must share a CONFIRMED booking</li>
+      <li>One rating per rater per booking (unique constraint)</li>
+      <li>Cannot rate yourself</li>
+      <li>After every rating: User.averageRating and User.totalRatings auto-updated via aggregate query</li>
+      <li>Tags: up to 5 custom tags per rating (e.g. "friendly", "punctual")</li>
+      <li>Eligibility check endpoint: frontend can check before showing rate button</li>
+      <li>RATING_REMINDER notification sent to rated user</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- Phase 11 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 11</div><div class="phase-title">Credits System</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">Double-entry credit ledger with balance tracking, atomic transactions, and internal API for other modules to add/deduct/refund credits.</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>CreditBalance: one row per user, created on first use via upsert</li>
+      <li>Every credit change creates a CreditTransaction ledger entry with before/after balance</li>
+      <li>All operations atomic via Prisma $transaction</li>
+      <li>addCredits() — RECHARGE type (admin top-up, Razorpay recharge)</li>
+      <li>deductCredits() — BOOKING_DEBIT type (guards against insufficient balance)</li>
+      <li>refundCredits() — REFUND type (booking cancellations)</li>
+      <li>These are internal functions — consumed by bookings, payments, admin modules</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- Phase 12 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 12</div><div class="phase-title">Admin Panel</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">Admin-only endpoints for platform management — user moderation, event control, credit top-up, and platform analytics.</p>
+    <h4>Key Implementation Details</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>All routes: authenticate + requireAdmin middleware (double-gated)</li>
+      <li>assertAdmin() re-checks DB on every request (not just JWT claim)</li>
+      <li>Ban user: sets isActive=false (banned users cannot log in)</li>
+      <li>Cancel event: sets event CANCELLED + voids all PAYMENT_PENDING/CONFIRMED bookings in one transaction</li>
+      <li>Stats: live aggregate queries (users, events, bookings, revenue)</li>
+      <li>Admin credit top-up: calls addCredits() which creates full audit trail</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- Phase 13 -->
+  <div class="phase-card">
+    <div class="phase-header">
+      <div><div class="phase-num">Phase 13</div><div class="phase-title">React Frontend</div></div>
+      <span class="done">Done + Tested</span>
+    </div>
+    <p class="phase-desc">Full React 18 + TypeScript SPA with 11 pages, real-time Socket.io integration, TanStack Query server state, Zustand auth store, Framer Motion animations, and a complete dark design system.</p>
+    <h4>Pages Built</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li><strong>Landing</strong> — public marketing page with hero + CTAs</li>
+      <li><strong>Login / Register</strong> — React Hook Form + Zod validation + JWT auth</li>
+      <li><strong>Events Discovery</strong> — search, category chips, city filter, paginated grid</li>
+      <li><strong>Event Detail</strong> — sections picker, I'm Going toggle, People going with connect buttons</li>
+      <li><strong>Profile</strong> — view + edit mode, avatar upload, interests/lookingFor chip editors</li>
+      <li><strong>Connections</strong> — 3 tabs (Connections, Requests, Sent), URL-driven (?tab=), accept/decline/block</li>
+      <li><strong>Conversations</strong> — WhatsApp-style two-panel, Socket.io real-time, typing indicators, delete messages</li>
+      <li><strong>Bookings</strong> — list with status badges, countdown timer, QR ticket modal</li>
+      <li><strong>BookingNew</strong> — 3-step flow (Review → Payment → Confirmed)</li>
+      <li><strong>Notifications</strong> — real-time badge, mark read, delete, click-to-navigate by type</li>
+      <li><strong>Admin Dashboard</strong> — stats overview + users table (ban/promote) + bookings list, URL-driven tabs</li>
+    </ul>
+    <h4>Key Frontend Patterns</h4>
+    <ul style="padding-left:18px; font-size:13px; color:#444;">
+      <li>sendPaginated contract: always <code>res.data.data</code> (array) + <code>res.data.pagination</code></li>
+      <li>URL-driven tab state via <code>useSearchParams</code> (Connections + Admin)</li>
+      <li>Socket.io singleton: <code>connectSocket(userId)</code> on login, <code>disconnectSocket()</code> on logout</li>
+      <li>React Query cache cleared on logout (<code>queryClient.clear()</code>) — prevents cache poisoning security bug</li>
+      <li>Token expiry: Axios interceptor → POST /auth/refresh → retry — seamless for user. On double-fail: toast + redirect</li>
+      <li>Mobile layout: MobileHeader (logo + avatar → profile) + BottomNav (5 tabs with real unread badge)</li>
+      <li>Sonner toast library for all user feedback (success, error, session expired)</li>
+    </ul>
+    <div class="progress-wrap" style="margin-top:16px;"><div class="progress-bar" style="width:100%"></div></div>
+  </div>
+
+  <!-- ─── 6. API REFERENCE ──────────────────────────────────────── -->
+  <h2 id="endpoints">6. Complete API Reference (60 Endpoints)</h2>
+
+  <p>Base URL: <code>http://localhost:5000/v1</code> &nbsp;|&nbsp; All protected routes require: <code>Authorization: Bearer &lt;accessToken&gt;</code></p>
+
+  <h3>Auth — <code>/v1/auth</code></h3>
+  <ul class="endpoint-list">
+    <li><span class="method post">POST</span><span class="route">/auth/register</span><span class="desc">Register new account — returns user + tokens</span></li>
+    <li><span class="method post">POST</span><span class="route">/auth/login</span><span class="desc">Login with email + password — returns tokens</span></li>
+    <li><span class="method post">POST</span><span class="route">/auth/refresh</span><span class="desc">Get new access token using refresh token</span></li>
+    <li><span class="method post">POST</span><span class="route">/auth/logout</span><span class="desc">Invalidate refresh token (Redis blacklist)</span></li>
+    <li><span class="method post">POST</span><span class="route">/auth/verify-email</span><span class="desc">Verify email with token from dev logs</span></li>
+    <li><span class="method post">POST</span><span class="route">/auth/forgot-password</span><span class="desc">Request password reset (anti-enumeration)</span></li>
+    <li><span class="method post">POST</span><span class="route">/auth/reset-password</span><span class="desc">Reset password with token from dev logs</span></li>
+  </ul>
+
+  <h3>Users — <code>/v1/users</code></h3>
+  <ul class="endpoint-list">
+    <li><span class="method get">GET</span><span class="route">/users/me</span><span class="desc">Get own full profile</span></li>
+    <li><span class="method patch">PATCH</span><span class="route">/users/me</span><span class="desc">Update own profile fields</span></li>
+    <li><span class="method post">POST</span><span class="route">/users/me/avatar</span><span class="desc">Upload avatar to Cloudinary</span></li>
+    <li><span class="method delete">DELETE</span><span class="route">/users/me</span><span class="desc">Soft-delete own account</span></li>
+    <li><span class="method get">GET</span><span class="route">/users/:id</span><span class="desc">Get public profile of another user</span></li>
+  </ul>
+
+  <h3>Events — <code>/v1/events</code></h3>
+  <ul class="endpoint-list">
+    <li><span class="method get">GET</span><span class="route">/events</span><span class="desc">List published events (Redis cached, filterable)</span></li>
+    <li><span class="method get">GET</span><span class="route">/events/:id</span><span class="desc">Event detail with sections (cached)</span></li>
+    <li><span class="method post">POST</span><span class="route">/events</span><span class="desc">Create event + sections (admin only)</span></li>
+    <li><span class="method patch">PATCH</span><span class="route">/events/:id</span><span class="desc">Update event (admin only)</span></li>
+    <li><span class="method delete">DELETE</span><span class="route">/events/:id</span><span class="desc">Cancel event (admin only)</span></li>
+    <li><span class="method post">POST</span><span class="route">/events/:id/availability</span><span class="desc">Mark self as available for event</span></li>
+    <li><span class="method patch">PATCH</span><span class="route">/events/:id/availability</span><span class="desc">Update availability status</span></li>
+    <li><span class="method delete">DELETE</span><span class="route">/events/:id/availability</span><span class="desc">Remove availability</span></li>
+    <li><span class="method get">GET</span><span class="route">/events/:id/available-users</span><span class="desc">Discover other users available at event</span></li>
+    <li><span class="method get">GET</span><span class="route">/events/:id/my-availability</span><span class="desc">Get own availability status for an event (added Phase 13)</span></li>
+  </ul>
+
+  <h3>Connections — <code>/v1/connections</code></h3>
+  <ul class="endpoint-list">
+    <li><span class="method post">POST</span><span class="route">/connections/request</span><span class="desc">Send connection request (event-scoped)</span></li>
+    <li><span class="method patch">PATCH</span><span class="route">/connections/:id/respond</span><span class="desc">Accept or decline a connection request</span></li>
+    <li><span class="method delete">DELETE</span><span class="route">/connections/:id</span><span class="desc">Remove a connection</span></li>
+    <li><span class="method get">GET</span><span class="route">/connections</span><span class="desc">List my accepted connections</span></li>
+    <li><span class="method get">GET</span><span class="route">/connections/pending</span><span class="desc">List pending received requests</span></li>
+    <li><span class="method get">GET</span><span class="route">/connections/sent</span><span class="desc">List sent (outgoing) connection requests</span></li>
+    <li><span class="method post">POST</span><span class="route">/connections/events/:eventId/users/:userId</span><span class="desc">Quick-connect from event attendee list</span></li>
+  </ul>
+
+  <h3>Conversations — <code>/v1/conversations</code></h3>
+  <ul class="endpoint-list">
+    <li><span class="method post">POST</span><span class="route">/conversations</span><span class="desc">Create DM or group conversation</span></li>
+    <li><span class="method get">GET</span><span class="route">/conversations</span><span class="desc">List my conversations (inbox)</span></li>
+    <li><span class="method get">GET</span><span class="route">/conversations/:id/messages</span><span class="desc">Get messages (paginated)</span></li>
+    <li><span class="method post">POST</span><span class="route">/conversations/:id/messages</span><span class="desc">Send a message (real-time via Socket.io)</span></li>
+    <li><span class="method delete">DELETE</span><span class="route">/conversations/:id/messages/:msgId</span><span class="desc">Soft-delete a message</span></li>
+  </ul>
+
+  <h3>Bookings — <code>/v1/bookings</code></h3>
+  <ul class="endpoint-list">
+    <li><span class="method post">POST</span><span class="route">/bookings</span><span class="desc">Create booking with seat lock + soft reservation</span></li>
+    <li><span class="method get">GET</span><span class="route">/bookings</span><span class="desc">List my bookings (initiator + participant)</span></li>
+    <li><span class="method get">GET</span><span class="route">/bookings/:id</span><span class="desc">Booking detail with participants</span></li>
+    <li><span class="method post">POST</span><span class="route">/bookings/:id/confirm</span><span class="desc">Confirm booking → CONFIRMED + generate tickets</span></li>
+    <li><span class="method post">POST</span><span class="route">/bookings/:id/cancel</span><span class="desc">Cancel booking + release seats if pending</span></li>
+    <li><span class="method get">GET</span><span class="route">/bookings/:id/ticket</span><span class="desc">Get ticket with QR code token</span></li>
+  </ul>
+
+  <h3>Payments — <code>/v1/payments</code></h3>
+  <ul class="endpoint-list">
+    <li><span class="method post">POST</span><span class="route">/payments/order</span><span class="desc">Create Razorpay order for booking</span></li>
+    <li><span class="method post">POST</span><span class="route">/payments/verify</span><span class="desc">Verify HMAC signature → confirm booking</span></li>
+    <li><span class="method get">GET</span><span class="route">/payments/:bookingId</span><span class="desc">Payment status for a booking</span></li>
+    <li><span class="method post">POST</span><span class="route">/payments/refund</span><span class="desc">Initiate refund via BullMQ queue</span></li>
+  </ul>
+
+  <h3>Notifications — <code>/v1/notifications</code></h3>
+  <ul class="endpoint-list">
+    <li><span class="method get">GET</span><span class="route">/notifications</span><span class="desc">List notifications with unread count</span></li>
+    <li><span class="method patch">PATCH</span><span class="route">/notifications/:id/read</span><span class="desc">Mark one notification as read</span></li>
+    <li><span class="method patch">PATCH</span><span class="route">/notifications/read-all</span><span class="desc">Mark all notifications as read</span></li>
+    <li><span class="method delete">DELETE</span><span class="route">/notifications/:id</span><span class="desc">Delete a notification</span></li>
+    <li><span class="method get">GET</span><span class="route">/notifications/unread-count</span><span class="desc">Get unread count only (sidebar badge)</span></li>
+  </ul>
+
+  <h3>Ratings — <code>/v1/ratings</code></h3>
+  <ul class="endpoint-list">
+    <li><span class="method post">POST</span><span class="route">/ratings</span><span class="desc">Submit rating (1–5, tags, review)</span></li>
+    <li><span class="method get">GET</span><span class="route">/ratings/user/:userId</span><span class="desc">Ratings received by a user + average score</span></li>
+    <li><span class="method get">GET</span><span class="route">/ratings/given</span><span class="desc">Ratings I have submitted</span></li>
+    <li><span class="method get">GET</span><span class="route">/ratings/can-rate/:userId/booking/:bookingId</span><span class="desc">Check rating eligibility</span></li>
+  </ul>
+
+  <h3>Credits — <code>/v1/credits</code></h3>
+  <ul class="endpoint-list">
+    <li><span class="method get">GET</span><span class="route">/credits/balance</span><span class="desc">My credit balance + totals</span></li>
+    <li><span class="method get">GET</span><span class="route">/credits/transactions</span><span class="desc">Full credit transaction history</span></li>
+  </ul>
+
+  <h3>Admin — <code>/v1/admin</code> (admin only)</h3>
+  <ul class="endpoint-list">
+    <li><span class="method get">GET</span><span class="route">/admin/stats</span><span class="desc">Platform stats: users, events, bookings, revenue</span></li>
+    <li><span class="method get">GET</span><span class="route">/admin/users</span><span class="desc">List all users with search + filters</span></li>
+    <li><span class="method patch">PATCH</span><span class="route">/admin/users/:id/ban</span><span class="desc">Ban user (sets isActive=false)</span></li>
+    <li><span class="method patch">PATCH</span><span class="route">/admin/users/:id/unban</span><span class="desc">Unban user</span></li>
+    <li><span class="method patch">PATCH</span><span class="route">/admin/users/:id/admin</span><span class="desc">Promote / demote admin role</span></li>
+    <li><span class="method post">POST</span><span class="route">/admin/credits</span><span class="desc">Top-up credits for any user</span></li>
+    <li><span class="method get">GET</span><span class="route">/admin/bookings</span><span class="desc">All bookings with optional status filter</span></li>
+    <li><span class="method patch">PATCH</span><span class="route">/admin/events/:id/cancel</span><span class="desc">Cancel event + void all bookings</span></li>
+  </ul>
+
+  <!-- ─── 7. FLOWS ──────────────────────────────────────────────── -->
+  <h2 id="flows">7. Key Business Flows</h2>
+
+  <h3>User Registration → Verified Account</h3>
+  <div class="flow">
+POST /auth/register
+  → hash password (bcrypt)
+  → create user (isVerified: false)
+  → generate verifyToken (HMAC SHA-256)
+  → <span class="yellow">dev: log token to console</span>  |  <span class="green">prod: send email via SES</span>
+  → return user + accessToken + refreshToken
+
+POST /auth/verify-email  { userId, token }
+  → validate token against DB
+  → set isVerified: true, emailVerifiedAt: now()
+  → delete token record
+  </div>
+
+  <h3>Event Discovery → Connection → Booking Flow</h3>
+  <div class="flow">
+1. GET /events                          <span class="green">← browse published events</span>
+2. POST /events/:id/availability        <span class="green">← mark "I'm going"</span>
+3. GET /events/:id/available-users      <span class="green">← discover other attendees</span>
+4. POST /connections/request            <span class="green">← send connection request</span>
+5. PATCH /connections/:id/respond       <span class="green">← other user accepts</span>
+6. POST /conversations                  <span class="green">← start DM or group chat</span>
+7. POST /bookings                       <span class="green">← book seats (Redis seat lock)</span>
+   → soft reservation: 15 min window
+8. POST /payments/order                 <span class="green">← create Razorpay order</span>
+9. POST /payments/verify                <span class="green">← verify payment signature</span>
+   → booking: CONFIRMED
+   → tickets: generated with QR codes
+   → BullMQ: ticket delivery job queued
+10. GET /bookings/:id/ticket            <span class="green">← retrieve ticket + QR code</span>
+  </div>
+
+  <h3>Seat Booking — Race Condition Prevention</h3>
+  <div class="flow">
+Request A                      Request B
+    │                              │
+    ▼                              ▼
+Redis SET NX EX (lock)         Redis SET NX EX (lock)
+    │ ← <span class="green">OK (lock acquired)</span>         │ ← <span class="accent">NULL (lock busy)</span>
+    ▼                              ▼
+Re-check seats in DB       Return 409 SEAT_LOCK_BUSY
+    │
+    ▼
+Prisma $transaction:
+  - eventSection.availableSeats -= N
+  - booking.create(PAYMENT_PENDING)
+  - bookingParticipant.createMany()
+    │
+    ▼
+Redis DEL (release lock)
+  </div>
+
+  <!-- ─── 8. TESTING ───────────────────────────────────────────── -->
+  <h2 id="testing">8. Testing Status</h2>
+
+  <table>
+    <tr><th>Module</th><th>Tested via Postman</th><th>Notes</th></tr>
+    <tr><td>Auth</td><td><span class="done">All 7 endpoints</span></td><td>Register, verify, login, refresh, logout, forgot, reset — all verified</td></tr>
+    <tr><td>Users</td><td><span class="done">All 5 endpoints</span></td><td>Profile CRUD + Cloudinary avatar upload confirmed working</td></tr>
+    <tr><td>Events</td><td><span class="done">All 9 endpoints</span></td><td>Create, list, detail, availability, available-users all tested</td></tr>
+    <tr><td>Connections</td><td><span class="done">All 5 endpoints</span></td><td>Request → accept → list flow tested with 2 users</td></tr>
+    <tr><td>Conversations</td><td><span class="done">All 5 endpoints</span></td><td>DM create, send message, get messages, delete tested</td></tr>
+    <tr><td>Bookings</td><td><span class="done">All 6 endpoints</span></td><td>Create → confirm → ticket flow tested. ParticipantStatus bug fixed.</td></tr>
+    <tr><td>Payments</td><td><span class="pending">Pending</span></td><td>Razorpay account setup needed</td></tr>
+    <tr><td>Notifications</td><td><span class="built">Partial</span></td><td>Built and integrated. Full flow test pending.</td></tr>
+    <tr><td>Ratings</td><td><span class="done">All 4 endpoints</span></td><td>Submit, list received, list given, can-rate check — all working</td></tr>
+    <tr><td>Credits</td><td><span class="done">Both endpoints</span></td><td>Balance and transactions confirmed working</td></tr>
+    <tr><td>Admin</td><td><span class="done">All 8 endpoints</span></td><td>Stats, user management, credits, event cancel — all tested</td></tr>
+  </table>
+
+  <!-- ─── 9. ROADMAP ───────────────────────────────────────────── -->
+  <h2 id="roadmap">9. Roadmap — What's Next</h2>
+
+  <ul class="checklist">
+    <li>Phase 1 — Foundation & Infrastructure</li>
+    <li>Phase 2 — Auth Module</li>
+    <li>Phase 3 — Users Module</li>
+    <li>Phase 4 — Events Module</li>
+    <li>Phase 5 — Connections Module</li>
+    <li>Phase 6 — Conversations & Messaging</li>
+    <li>Phase 7 — Bookings & Ticketing</li>
+    <li>Phase 8 — Payments (Razorpay)</li>
+    <li>Phase 9 — Notifications</li>
+    <li>Phase 10 — Ratings & Reviews</li>
+    <li>Phase 11 — Credits System</li>
+    <li>Phase 12 — Admin Panel</li>
+    <li>Merge develop → main (backend release checkpoint)</li>
+    <li>Set up Razorpay account and test Phase 8 end-to-end</li>
+    <li>Phase 13 — React Frontend scaffold + design system</li>
+    <li>Events Discovery page — search, filter, category, pagination</li>
+    <li>Event Detail page — hero, sections, availability, book now</li>
+    <li>Profile page — own profile + edit mode + avatar upload</li>
+    <li>Connections page — 3 tabs (Connections, Requests, Sent), URL-driven</li>
+    <li>Chat page — conversation list + real-time message thread (Socket.io)</li>
+    <li>Bookings page — my bookings + ticket QR view + BookingNew 3-step flow</li>
+    <li>Notifications page — real-time badge, mark read, delete, click-to-navigate</li>
+    <li>Admin Dashboard — stats + users (ban/promote) + bookings, URL-driven tabs</li>
+    <li>Mobile navigation — MobileHeader + BottomNav with real unread count</li>
+    <li>Merge feature/frontend → develop → main (pending final QA)</li>
+    <li class="next">Phase 14 — Deployment (Railway / Render / AWS)</li>
+    <li class="next">Razorpay account setup + end-to-end payment flow test</li>
+  </ul>
+
+  <div class="success">
+    <strong>Full-stack complete — Backend + Frontend 100% done.</strong> 13 phases built, 60 API endpoints, 21 DB tables, 11 frontend pages. Feature branch ready for merge to main. Pending: deployment setup + Razorpay live account testing.
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ FRONTEND -->
+
+  <h2 id="frontend-arch">10. Frontend Architecture</h2>
+
+  <p>The frontend is a React 18 + TypeScript single-page application built with Vite, living in <code>apps/web/</code> inside the monorepo. It communicates exclusively with the backend REST API at <code>http://localhost:5000/v1</code> via an Axios instance with automatic token injection and refresh interceptors.</p>
+
+  <h3>Frontend Tech Stack</h3>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-name">React 18</div><div class="tech-ver">^18.3.1</div><div class="tech-use">UI library with concurrent features</div></div>
+    <div class="tech-item"><div class="tech-name">TypeScript</div><div class="tech-ver">^5.5.3</div><div class="tech-use">Full type safety, shared with backend Zod schemas</div></div>
+    <div class="tech-item"><div class="tech-name">Vite</div><div class="tech-ver">^5.3.4</div><div class="tech-use">Build tool — instant HMR, fast production build</div></div>
+    <div class="tech-item"><div class="tech-name">Tailwind CSS</div><div class="tech-ver">^3.4.7</div><div class="tech-use">Utility-first styling with custom design tokens</div></div>
+    <div class="tech-item"><div class="tech-name">React Router v6</div><div class="tech-ver">^6.25.1</div><div class="tech-use">Client-side routing with protected route wrapper</div></div>
+    <div class="tech-item"><div class="tech-name">TanStack Query</div><div class="tech-ver">^5.51.1</div><div class="tech-use">Server state — fetch, cache, refetch, mutations</div></div>
+    <div class="tech-item"><div class="tech-name">Zustand</div><div class="tech-ver">^4.5.4</div><div class="tech-use">Client state — auth user, UI state</div></div>
+    <div class="tech-item"><div class="tech-name">Axios</div><div class="tech-ver">^1.7.2</div><div class="tech-use">HTTP client with interceptors for auth</div></div>
+    <div class="tech-item"><div class="tech-name">Framer Motion</div><div class="tech-ver">^11.x</div><div class="tech-use">Page transitions and micro-animations</div></div>
+    <div class="tech-item"><div class="tech-name">React Hook Form</div><div class="tech-ver">^7.x</div><div class="tech-use">Form state management</div></div>
+    <div class="tech-item"><div class="tech-name">Zod</div><div class="tech-ver">^3.23.8</div><div class="tech-use">Form validation — same schemas as backend</div></div>
+    <div class="tech-item"><div class="tech-name">Socket.io Client</div><div class="tech-ver">^4.7.5</div><div class="tech-use">Real-time events — messages, notifications</div></div>
+    <div class="tech-item"><div class="tech-name">Lucide React</div><div class="tech-ver">latest</div><div class="tech-use">Icon library — consistent, tree-shakeable</div></div>
+    <div class="tech-item"><div class="tech-name">date-fns</div><div class="tech-ver">latest</div><div class="tech-use">Date formatting utilities</div></div>
+  </div>
+
+  <h3>Frontend Folder Structure</h3>
+  <div class="flow">
+<span class="green">apps/web/src/</span>
+├── <span class="accent">components/</span>
+│   ├── layout/
+│   │   ├── AppLayout.tsx       ← main shell (sidebar + content)
+│   │   ├── Sidebar.tsx         ← left nav (desktop)
+│   │   ├── BottomNav.tsx       ← tab bar (mobile)
+│   │   └── ProtectedRoute.tsx  ← auth guard wrapper
+│   └── ui/
+│       └── EventCard.tsx       ← reusable event card component
+├── <span class="yellow">pages/</span>
+│   ├── Landing.tsx             ← public marketing page
+│   ├── auth/
+│   │   ├── Login.tsx
+│   │   └── Register.tsx
+│   ├── Events.tsx              ← event discovery (search + filter + grid)
+│   ├── EventDetail.tsx         ← single event (sections, book, going)
+│   └── ComingSoon.tsx          ← placeholder for unbuilt pages
+├── <span class="green">store/</span>
+│   └── authStore.ts            ← Zustand: user, accessToken, hydrate()
+├── <span class="green">lib/</span>
+│   ├── api.ts                  ← Axios instance + interceptors
+│   └── utils.ts                ← cn(), formatDate(), formatCurrency()
+└── <span class="green">types/</span>
+    └── event.ts                ← Event, EventSection, AvailableUser types
+  </div>
+
+  <h3>Responsive Layout Strategy</h3>
+  <div class="flow">
+<span class="yellow">Desktop (≥1024px)</span>
+  ┌─────────────────────────────────────────────────────┐
+  │  Sidebar (240px fixed)  │  Main content (fluid)     │
+  │  Logo + Nav items       │  Scrollable page content  │
+  │  User avatar + name     │                           │
+  └─────────────────────────────────────────────────────┘
+
+<span class="yellow">Tablet (768px–1023px)</span>
+  ┌─────────────────────────────────────────────────────┐
+  │  Collapsed sidebar      │  Main content (wider)     │
+  │  (icons only, 64px)     │                           │
+  └─────────────────────────────────────────────────────┘
+
+<span class="yellow">Mobile (&lt;768px)</span>
+  ┌─────────────────────────┐
+  │  Full width content     │
+  │                         │
+  │─────────────────────────│
+  │  Bottom tab bar         │
+  │  Events · Chat · Me     │
+  └─────────────────────────┘
+  </div>
+
+  <!-- ─── DESIGN SYSTEM ────────────────────────────────────────── -->
+  <h2 id="design-system">11. Design System</h2>
+
+  <p>EventMeet targets the 22–28 age group — concert-goers, sports fans, tech meetup attendees. The design is <strong>dark by default</strong>, premium in feel, social and fun to use. Inspired by Spotify + Luma.events.</p>
+
+  <h3>Color Palette</h3>
+  <table>
+    <tr><th>Token</th><th>Hex Value</th><th>Usage</th></tr>
+    <tr><td><code>base</code></td><td>#0a0a0f</td><td>App background — near black (easier on eyes than pure black)</td></tr>
+    <tr><td><code>surface</code></td><td>#13131a</td><td>Cards, sidebars, inputs</td></tr>
+    <tr><td><code>elevated</code></td><td>#1c1c27</td><td>Modals, dropdowns, hover states</td></tr>
+    <tr><td><code>border</code></td><td>#2a2a3a</td><td>Card borders, dividers</td></tr>
+    <tr><td><code>violet</code></td><td>#7c3aed</td><td>Primary accent — buttons, active states, selected</td></tr>
+    <tr><td><code>violet-light</code></td><td>#9f67ff</td><td>Hover states, price labels, highlights</td></tr>
+    <tr><td><code>pink</code></td><td>#e94560</td><td>Secondary accent — CTAs, error, sold-out badges</td></tr>
+    <tr><td><code>text-primary</code></td><td>#f1f0ff</td><td>Headings, body text</td></tr>
+    <tr><td><code>text-secondary</code></td><td>#8b8a9b</td><td>Labels, captions, metadata</td></tr>
+    <tr><td><code>text-disabled</code></td><td>#4a4a5a</td><td>Placeholder text, muted info</td></tr>
+    <tr><td><code>success</code></td><td>#22c55e</td><td>Confirmed, going, positive states</td></tr>
+    <tr><td><code>warning</code></td><td>#f59e0b</td><td>Pending, expiry warnings</td></tr>
+    <tr><td><code>error</code></td><td>#ef4444</td><td>Errors, failed states</td></tr>
+  </table>
+
+  <h3>Typography</h3>
+  <table>
+    <tr><th>Usage</th><th>Font</th><th>Weight</th></tr>
+    <tr><td>All text</td><td>Inter</td><td>400 (body), 500 (medium), 700 (bold), 800 (display)</td></tr>
+    <tr><td>Ticket codes, IDs, QR</td><td>JetBrains Mono</td><td>400</td></tr>
+  </table>
+
+  <h3>Global CSS Component Classes</h3>
+  <div class="flow">
+.card        → surface bg, border, rounded-lg, padding — base card shell
+.btn-primary → violet gradient background, white text, hover glow
+.btn-secondary → surface bg, border, hover border-violet
+.btn-ghost   → transparent, hover surface bg
+.input       → surface bg, border, rounded, focus ring violet
+.badge       → small pill label (badge-violet, badge-pink, badge-success)
+  </div>
+
+  <h3>Animations</h3>
+  <table>
+    <tr><th>Name</th><th>Definition</th><th>Used on</th></tr>
+    <tr><td>fade-in</td><td>opacity 0→1, 200ms ease-out</td><td>Page mounts, modals</td></tr>
+    <tr><td>slide-up</td><td>opacity 0→1 + translateY 12px→0, 300ms</td><td>Cards, list items</td></tr>
+    <tr><td>slide-in</td><td>opacity 0→1 + translateX -12px→0, 300ms</td><td>Sidebar, panels</td></tr>
+    <tr><td>Framer Motion</td><td>staggered card entrance (delay: index * 50ms)</td><td>Event grid cards</td></tr>
+  </table>
+
+  <!-- ─── DATA LIFECYCLE ───────────────────────────────────────── -->
+  <h2 id="lifecycle">12. Data Lifecycle — Frontend ↔ Backend</h2>
+
+  <p>Every data fetch in the frontend follows a consistent lifecycle through these layers: <strong>Component → React Query → Axios → Backend API → Database → Redis Cache → Response → UI</strong>.</p>
+
+  <h3>Full Request Lifecycle</h3>
+  <div class="flow">
+<span class="yellow">User opens /events page</span>
+         │
+         ▼
+<span class="green">React Component mounts</span>
+  useQuery({ queryKey: ['events', category, city, page] })
+         │
+         ▼
+<span class="green">TanStack Query checks cache</span>
+  → staleTime: 2 minutes
+  → If fresh data in cache → render immediately (no network call)
+  → If stale or absent → fire queryFn()
+         │
+         ▼
+<span class="green">queryFn() calls Axios</span>
+  api.get('/events', { params: { page, limit, category, city } })
+         │
+         ▼
+<span class="green">Axios Request Interceptor</span>
+  → reads accessToken from sessionStorage
+  → attaches: Authorization: Bearer &lt;token&gt;
+  → sends to: http://localhost:5000/v1/events
+         │
+         ▼
+<span class="accent">Backend receives request</span>
+  → authenticate middleware: verifies JWT signature + expiry
+  → rate limiter: checks Redis for request count
+  → validate middleware: Zod schema check on query params
+         │
+         ▼
+<span class="accent">events.service.listEvents()</span>
+  → build Redis cache key: events:city:category:date:page
+  → redis.get(cacheKey) → if HIT → return JSON.parse(cached)
+  → if MISS → Prisma query → PostgreSQL
+  → redis.setex(cacheKey, 120s, JSON.stringify(result))
+  → return { events[], total, page, limit }
+         │
+         ▼
+<span class="accent">sendPaginated() builds response</span>
+  {
+    success: true,
+    data: [ ...Event[] ],
+    pagination: { page, limit, total, hasMore }
+  }
+         │
+         ▼
+<span class="green">Axios Response Interceptor</span>
+  → on 200: pass through
+  → on 401 (token expired):
+       → POST /auth/refresh (sends httpOnly cookie)
+       → get new accessToken
+       → sessionStorage.setItem('access_token', newToken)
+       → retry original request with new token
+  → on 401 (refresh also fails): redirect to /login
+         │
+         ▼
+<span class="green">TanStack Query receives data</span>
+  → stores in query cache keyed by ['events', category, city, page]
+  → sets background refetch timer
+  → triggers React re-render
+         │
+         ▼
+<span class="green">Component renders</span>
+  → isLoading → Loader spinner
+  → isError   → error state with retry button
+  → data      → grid of EventCard components
+  → each EventCard is a framer-motion animated div with stagger delay
+  </div>
+
+  <h3>Token Lifecycle — Access + Refresh</h3>
+  <div class="flow">
+<span class="yellow">Login flow:</span>
+POST /auth/login { email, password }
+  → server validates credentials
+  → generates accessToken (JWT, 15 min TTL)
+  → generates refreshToken (JWT, 30 day TTL)
+  → stores refreshToken hash in Redis: refresh:&lt;userId&gt;:&lt;jti&gt;
+  → returns accessToken in response body
+  → sets refreshToken in httpOnly cookie (Secure, SameSite=Strict)
+
+<span class="yellow">Frontend stores:</span>
+  sessionStorage.setItem('access_token', accessToken)
+  ← refreshToken is in httpOnly cookie (never readable by JS)
+
+<span class="yellow">Every API request:</span>
+  Axios interceptor → Authorization: Bearer &lt;accessToken&gt;
+
+<span class="yellow">Token expiry (401 response):</span>
+  → Axios response interceptor catches 401
+  → POST /auth/refresh { } ← cookie sent automatically
+  → server validates refreshToken from cookie
+  → issues new accessToken
+  → frontend retries original request seamlessly
+  → user never sees a login screen
+
+<span class="yellow">Logout:</span>
+  → POST /auth/logout { refreshToken }
+  → server deletes Redis key: refresh:&lt;userId&gt;:&lt;jti&gt;
+  → frontend clears sessionStorage
+  → redirect to /login
+  </div>
+
+  <h3>React Query Cache Strategy</h3>
+  <table>
+    <tr><th>Query Key</th><th>staleTime</th><th>Cache Behaviour</th></tr>
+    <tr><td>['events', category, city, page]</td><td>2 minutes</td><td>Shared across navigation — instant back-navigation</td></tr>
+    <tr><td>['event', id]</td><td>default (0)</td><td>Always fresh on mount — viewCount increments each visit</td></tr>
+    <tr><td>['event-available-users', id]</td><td>default (0)</td><td>Always fresh — social list must be up to date</td></tr>
+    <tr><td>Auth mutations</td><td>n/a</td><td>Mutations invalidate related queries on success</td></tr>
+  </table>
+
+  <h3>Real-time Layer — Socket.io</h3>
+  <div class="flow">
+<span class="yellow">Connection:</span>
+  Frontend → socket.connect({ auth: { token: accessToken } })
+  Backend  → authenticate socket via token → join room: user:&lt;userId&gt;
+
+<span class="yellow">Server pushes events to client:</span>
+  notification:new       → new notification received
+  message:new            → new chat message in a conversation
+  booking:confirmed      → booking status updated to CONFIRMED
+  booking:cancelled      → booking cancelled
+  connection:request     → someone sent a connection request
+  connection:accepted    → your connection request was accepted
+
+<span class="yellow">Client listens:</span>
+  socket.on('notification:new', (data) =&gt; {
+    queryClient.invalidateQueries(['notifications'])
+    // show toast notification
+  })
+  socket.on('message:new', (data) =&gt; {
+    queryClient.invalidateQueries(['messages', conversationId])
+  })
+  </div>
+
+  <!-- ─── AUTH FLOW ─────────────────────────────────────────────── -->
+  <h2 id="auth-flow">13. Auth Flow — Login to Protected Page</h2>
+
+  <div class="flow">
+<span class="yellow">User visits http://localhost:5173/events (unauthenticated)</span>
+         │
+         ▼
+<span class="green">React Router renders &lt;ProtectedRoute /&gt;</span>
+  → reads Zustand authStore: { user, accessToken }
+  → accessToken is null → redirect to /login
+         │
+         ▼
+<span class="green">User fills Login form</span>
+  → React Hook Form controls inputs
+  → Zod schema validates: email format, password min 6 chars
+  → on submit: useMutation → POST /auth/login
+         │
+         ▼
+<span class="accent">Backend: POST /v1/auth/login</span>
+  → rate limited: 10 req / 15 min per IP
+  → bcrypt.compare(password, hashedPassword)
+  → generate accessToken + refreshToken
+  → return 200 { tokens: { accessToken, refreshToken } }
+         │
+         ▼
+<span class="green">Frontend onSuccess callback</span>
+  → sessionStorage.setItem('access_token', token)
+  → authStore.setUser(user)
+  → authStore.setToken(accessToken)
+  → navigate('/events')
+         │
+         ▼
+<span class="green">ProtectedRoute re-evaluates</span>
+  → accessToken now exists → render &lt;AppLayout /&gt;
+         │
+         ▼
+<span class="green">AppLayout renders</span>
+  → Sidebar (desktop) or BottomNav (mobile) + &lt;Outlet /&gt;
+  → Events page mounts inside Outlet
+  → useQuery fires → events fetched → grid rendered
+  </div>
+
+  <h3>Zustand Auth Store</h3>
+  <div class="flow">
+interface AuthStore {
+  user:         User | null
+  accessToken:  string | null
+  setUser:      (user: User) =&gt; void
+  setToken:     (token: string) =&gt; void
+  logout:       () =&gt; void
+  hydrate:      () =&gt; void   ← reads sessionStorage on app boot
+}
+
+<span class="yellow">On app mount (main.tsx):</span>
+  authStore.hydrate()
+  → reads sessionStorage for existing token
+  → if token exists: set in store → user stays logged in after refresh
+  → if absent: store remains null → ProtectedRoute redirects to /login
+  </div>
+
+  <!-- ─── FRONTEND PAGES ────────────────────────────────────────── -->
+  <h2 id="frontend-pages">14. Frontend Pages Built</h2>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 1</div>
+        <div class="phase-title">Landing Page <code>/</code></div>
+        <div class="phase-desc">Public marketing page for unauthenticated users. Full-screen hero, CTA buttons, feature highlights.</div>
+      </div>
+      <span class="done">BUILT</span>
+    </div>
+    <ul class="checklist">
+      <li>Hero section with gradient background and EventMeet tagline</li>
+      <li>Feature highlights — discover, connect, book</li>
+      <li>CTA buttons → /register and /login</li>
+      <li>Redirects to /events if already authenticated</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 2</div>
+        <div class="phase-title">Login / Register <code>/login</code> <code>/register</code></div>
+        <div class="phase-desc">Auth pages with form validation, error display, and redirect on success.</div>
+      </div>
+      <span class="done">BUILT</span>
+    </div>
+    <ul class="checklist">
+      <li>React Hook Form + Zod validation (email format, password rules)</li>
+      <li>Mutation via TanStack Query → POST /auth/login or /auth/register</li>
+      <li>Error messages displayed inline (INVALID_CREDENTIALS, EMAIL_EXISTS etc.)</li>
+      <li>On success: token stored, navigate to /events</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 3</div>
+        <div class="phase-title">Event Discovery <code>/events</code></div>
+        <div class="phase-desc">Main app feed. Responsive grid of events with search, category filter, city filter, and pagination.</div>
+      </div>
+      <span class="done">BUILT + TESTED</span>
+    </div>
+    <ul class="checklist">
+      <li>useQuery: GET /v1/events?page&amp;limit&amp;category&amp;city — staleTime 2 min</li>
+      <li>8 category chips (Music, Comedy, Sports, Tech, Theater, Art, Food, Other)</li>
+      <li>Client-side search filter on event title</li>
+      <li>City text filter sent as API query param</li>
+      <li>Pagination controls (Previous / Page N of M / Next)</li>
+      <li>EventCard: banner image, category badge, date, venue, price, seats left, going count</li>
+      <li>Framer Motion stagger animation on card entrance</li>
+      <li>Loading spinner, error state with retry, empty state</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 4</div>
+        <div class="phase-title">Event Detail <code>/events/:id</code></div>
+        <div class="phase-desc">Full event page. Hero banner, venue info, section picker, availability toggle, people going panel.</div>
+      </div>
+      <span class="done">BUILT + TESTED</span>
+    </div>
+    <ul class="checklist">
+      <li>useQuery: GET /v1/events/:id — event detail with sections + creator + venue</li>
+      <li>useQuery: GET /v1/events/:id/available-users — list of attendees going</li>
+      <li>Hero banner with category badge, title overlay, view count, going count</li>
+      <li>Date/time panel with doors-open time if set</li>
+      <li>Venue panel with address + Google Maps external link</li>
+      <li>Description block + tags row</li>
+      <li>Section cards: name, price, seats left, % fill progress bar (red when >80%)</li>
+      <li>Book Now button — disabled until section selected, navigates to booking flow</li>
+      <li>I'm Going toggle: useMutation → POST or DELETE /events/:id/availability</li>
+      <li>Optional note input for availability (e.g. "Looking for a group!")</li>
+      <li>People going sidebar: avatar + name + note, shows up to 5 + overflow count</li>
+      <li>Organizer card with avatar and name</li>
+      <li>Fully responsive: stacks to single column on mobile</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 5</div>
+        <div class="phase-title">Profile Page <code>/profile</code></div>
+        <div class="phase-desc">User's own profile view — avatar, bio, social links, stats. Editable inline via modal form.</div>
+      </div>
+      <span class="done">BUILT</span>
+    </div>
+    <ul class="checklist">
+      <li>Fetch own profile: GET /v1/users/me</li>
+      <li>Display avatar (Cloudinary URL or initials fallback), fullName, bio, username, city</li>
+      <li>Stats row: events attended, connections count, bookings count</li>
+      <li>Edit profile modal — React Hook Form with Zod, PATCH /v1/users/me on submit</li>
+      <li>Avatar upload: file input → PATCH /v1/users/me with base64 or Cloudinary URL</li>
+      <li>Logout button: clears queryClient cache → clears Zustand auth → navigate /login</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 6</div>
+        <div class="phase-title">Connections <code>/connections</code></div>
+        <div class="phase-desc">Three-tab view: My Connections, Received Requests, Sent Requests. URL-driven tab state.</div>
+      </div>
+      <span class="done">BUILT + TESTED</span>
+    </div>
+    <ul class="checklist">
+      <li>Tab 1 — Connections: GET /v1/connections — accepted connections list</li>
+      <li>Tab 2 — Requests: GET /v1/connections/requests — incoming pending requests with Accept/Decline</li>
+      <li>Tab 3 — Sent: GET /v1/connections/sent — outgoing requests with status badges</li>
+      <li>URL-driven tabs via useSearchParams: /connections (default), /connections?tab=requests, /connections?tab=sent</li>
+      <li>Accept/Decline via PATCH /v1/connections/:id — queryClient.invalidateQueries on success</li>
+      <li>Message button on accepted connections → navigates to /conversations with conversationId in state</li>
+      <li>Avatar initials fallback, connection date, optional shared event badge</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 7</div>
+        <div class="phase-title">Chat / Conversations <code>/conversations</code></div>
+        <div class="phase-desc">Two-panel chat UI: conversation list on left, message thread on right. Real-time via Socket.io.</div>
+      </div>
+      <span class="done">BUILT + TESTED</span>
+    </div>
+    <ul class="checklist">
+      <li>Left panel: GET /v1/conversations — list with last message preview + unread count</li>
+      <li>Right panel: GET /v1/conversations/:id/messages — full message thread</li>
+      <li>Real-time: socket.on('message:new') appends message to thread without refetch</li>
+      <li>Send message: POST /v1/conversations/:id/messages — emits via socket for instant delivery</li>
+      <li>Auto-scroll to latest message on new message received</li>
+      <li>getSocket() singleton — one socket connection shared across pages</li>
+      <li>Navigating from Connections page passes conversationId via React Router state to pre-select thread</li>
+      <li>Empty state: "Select a conversation" or "Start a conversation from your connections"</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 8</div>
+        <div class="phase-title">Bookings List <code>/bookings</code></div>
+        <div class="phase-desc">User's booking history. Card list with event title, section, status badge, amount, and ticket download.</div>
+      </div>
+      <span class="done">BUILT</span>
+    </div>
+    <ul class="checklist">
+      <li>useQuery: GET /v1/bookings — list of own bookings with event + section data</li>
+      <li>Status badge: CONFIRMED (green), PAYMENT_PENDING (amber), CANCELLED (red)</li>
+      <li>Amount display: ₹ formatted with Intl.NumberFormat en-IN locale</li>
+      <li>Ticket download: GET /v1/bookings/:id/ticket — PDF generation via BullMQ queue</li>
+      <li>Cancel booking: DELETE /v1/bookings/:id — available for PAYMENT_PENDING only</li>
+      <li>Empty state with CTA → /events to discover events</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 9</div>
+        <div class="phase-title">New Booking Flow <code>/bookings/new</code></div>
+        <div class="phase-desc">Multi-step booking form: select section → add participants → confirm + pay. Seat reservation with expiry.</div>
+      </div>
+      <span class="done">BUILT</span>
+    </div>
+    <ul class="checklist">
+      <li>Pre-populated from EventDetail via URL params (eventId, sectionId)</li>
+      <li>Section summary: name, price per seat, seats available</li>
+      <li>Participant count picker — seat count × price = total amount</li>
+      <li>Optional invite connections as participants (GET /v1/connections for autocomplete)</li>
+      <li>useMutation: POST /v1/bookings — creates PAYMENT_PENDING booking, starts 15-min expiry timer</li>
+      <li>Payment placeholder: amount display + "Proceed to Payment" CTA (Razorpay integration pending)</li>
+      <li>Redirect to /bookings on success with toast confirmation</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 10</div>
+        <div class="phase-title">Notifications <code>/notifications</code></div>
+        <div class="phase-desc">Notification inbox with real-time updates via Socket.io. Click navigates to relevant page. Mark-as-read + delete.</div>
+      </div>
+      <span class="done">BUILT + TESTED</span>
+    </div>
+    <ul class="checklist">
+      <li>useQuery: GET /v1/notifications — uses sendPaginated, array at res.data.data</li>
+      <li>Unread count from res.data.pagination.extra.unreadCount (sendPaginated extra field pattern)</li>
+      <li>Real-time: socket.on('notification:new') → queryClient.invalidateQueries(['notifications'])</li>
+      <li>Click on notification → PATCH /v1/notifications/:id/read + navigate to relevant route</li>
+      <li>Navigation routing: CONNECTION_REQUEST → /connections?tab=requests, BOOKING_CONFIRMED → /bookings, etc.</li>
+      <li>Delete: DELETE /v1/notifications/:id — optimistic remove from list</li>
+      <li>Unread dot indicator per item + blue highlighted row for unread</li>
+      <li>13 notification types handled with icon + color mapping</li>
+    </ul>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header">
+      <div>
+        <div class="phase-num">Page 11</div>
+        <div class="phase-title">Admin Dashboard <code>/admin</code></div>
+        <div class="phase-desc">Platform management console. Overview stats, user management (ban/promote), all bookings list.</div>
+      </div>
+      <span class="done">BUILT + TESTED</span>
+    </div>
+    <ul class="checklist">
+      <li>Guard: only renders for users where auth.user.isAdmin === true (sidebar link hidden otherwise)</li>
+      <li>URL-driven tabs via useSearchParams: /admin, /admin?tab=users, /admin?tab=bookings</li>
+      <li>Tab 1 — Overview: GET /v1/admin/stats — 6 stat cards (users, events, bookings, revenue, ratings)</li>
+      <li>Tab 2 — Users: GET /v1/admin/users?page&amp;limit&amp;search — paginated user table</li>
+      <li>Ban/Unban: PATCH /v1/admin/users/:id/ban and /unban — isActive toggle</li>
+      <li>Promote/Demote admin: PATCH /v1/admin/users/:id/admin { makeAdmin: true/false }</li>
+      <li>Tab 3 — Bookings: GET /v1/admin/bookings?page&amp;limit — all platform bookings with user + event</li>
+      <li>Framer Motion fade-in on tab switch, pagination controls, search input</li>
+    </ul>
+  </div>
+
+  <br><br>
+  <p style="text-align:center; color:#aaa; font-size:12px;">EventMeet Technical Documentation — Updated March 2026 &nbsp;|&nbsp; Backend: Node.js · TypeScript · PostgreSQL · Redis · Socket.io &nbsp;|&nbsp; Frontend: React 18 · Vite · Tailwind · TanStack Query</p>
+  <br>
+
+</div>
+</body>
+</html>
