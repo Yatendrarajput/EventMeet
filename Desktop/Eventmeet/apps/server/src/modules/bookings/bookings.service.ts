@@ -61,7 +61,7 @@ export async function createBooking(initiatorId: string, input: CreateBookingInp
       throw new AppError(409, 'INSUFFICIENT_SEATS', 'Not enough seats available')
     }
 
-    const pricePerSeat    = new Decimal(freshSection.pricePerSeat.toString())
+    const pricePerSeat    = new Decimal((freshSection.pricePerSeat ?? 0).toString())
     const baseAmount      = pricePerSeat.mul(totalParticipants)
     const perPersonAmount = pricePerSeat
     const softExpiry      = new Date(Date.now() + SOFT_RESERVATION_MINUTES * 60 * 1000)

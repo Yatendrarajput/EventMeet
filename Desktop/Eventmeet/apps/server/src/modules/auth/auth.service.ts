@@ -57,7 +57,7 @@ export async function register(
   const user = await prisma.$transaction(async (tx) => {
     const created = await tx.user.create({
       data: { email, passwordHash, fullName },
-      select: { id: true, email: true, fullName: true, isVerified: true, emailVerifiedAt: true },
+      select: { id: true, email: true, fullName: true, isVerified: true, isAdmin: true, emailVerifiedAt: true },
     })
     await tx.creditBalance.create({ data: { userId: created.id } })
     return created

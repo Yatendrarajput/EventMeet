@@ -23,7 +23,7 @@ export function sendCreated<T>(res: Response, data: T, message = 'Created'): Res
 export function sendPaginated<T>(
   res: Response,
   data: T[],
-  pagination: { page: number; limit: number; total: number },
+  pagination: { page: number; limit: number; total: number; extra?: Record<string, unknown> },
   message = 'Success'
 ): Response {
   return res.status(200).json({

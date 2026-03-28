@@ -60,7 +60,8 @@ export async function createRating(raterId: string, input: CreateRatingInput) {
   // Notify rated user
   try {
     const rater = await prisma.user.findUnique({ where: { id: raterId }, select: { fullName: true } })
-    await createNotification(ratedUserId, {
+    await createNotification({
+      userId:  ratedUserId,
       type:    'RATING_REMINDER',
       title:   'You received a rating',
       body:    `${rater?.fullName ?? 'Someone'} rated you ${score}/5`,
