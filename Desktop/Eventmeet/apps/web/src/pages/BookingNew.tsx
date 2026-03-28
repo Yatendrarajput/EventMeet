@@ -110,15 +110,17 @@ export default function BookingNew() {
 
       {/* Progress steps */}
       <div className="flex items-center gap-2">
-        {(['review', 'paying', 'done'] as const).map((s, i) => (
+        {(['review', 'paying', 'done'] as const).map((s, i) => {
+          const isDone = (step as string) === 'done'
+          return (
           <div key={s} className="flex items-center gap-2 flex-1">
             <div className={cn(
               'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold',
               step === s ? 'bg-violet text-white' :
-              (step === 'paying' && s === 'review') || step === 'done' ? 'bg-success/20 text-success' :
+              (step === 'paying' && s === 'review') || isDone ? 'bg-success/20 text-success' :
               'bg-elevated text-text-disabled'
             )}>
-              {(step === 'paying' && s === 'review') || step === 'done' && s !== 'done'
+              {(step === 'paying' && s === 'review') || isDone && s !== 'done'
                 ? <CheckCircle className="w-4 h-4" />
                 : i + 1
               }
@@ -129,7 +131,8 @@ export default function BookingNew() {
             )}>{s === 'paying' ? 'Payment' : s === 'done' ? 'Confirmed' : 'Review'}</span>
             {i < 2 && <div className="flex-1 h-px bg-border" />}
           </div>
-        ))}
+        )})}
+
       </div>
 
       {/* Event summary card */}
