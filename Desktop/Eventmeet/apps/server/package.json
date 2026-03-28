@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",
     "db:generate": "prisma generate",
@@ -46,6 +46,7 @@
     "@types/node": "^20.14.11",
     "@types/uuid": "^10.0.0",
     "prisma": "^5.16.0",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.16.2",
     "typescript": "^5.5.3"
   }
