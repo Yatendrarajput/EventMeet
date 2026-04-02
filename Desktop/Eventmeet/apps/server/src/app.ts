@@ -34,10 +34,14 @@ export function createApp() {
   // ── Security headers
   app.use(helmet())
 
-  // ── CORS
+  // ── CORS — supports comma-separated CLIENT_URL for multiple origins
+  const allowedOrigins = config.CLIENT_URL.split(',').map(o => o.trim())
   app.use(
     cors({
-      origin: config.CLIENT_URL,
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
+        callback(new Error(`CORS: origin ${origin} not allowed`))
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],

@@ -8,9 +8,10 @@ import { logger } from '@/shared/utils/logger'
 let io: SocketServer
 
 export function initSocket(httpServer: HttpServer): SocketServer {
+  const allowedOrigins = config.CLIENT_URL.split(',').map(o => o.trim())
   io = new SocketServer(httpServer, {
     cors: {
-      origin: config.CLIENT_URL,
+      origin: allowedOrigins,
       methods: ['GET', 'POST'],
       credentials: true,
     },
